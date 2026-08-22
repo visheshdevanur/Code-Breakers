@@ -16,61 +16,49 @@ export default function ResourceTable({ camps = seedCamps, resources = seedResou
     return { ...camp, food: food ? getDaysRemaining(food) : 0, water: water ? getDaysRemaining(water) : 0, medicine: medicine ? getDaysRemaining(medicine) : 0, shelterPct: camp.total_capacity > 0 ? Math.round((camp.current_population / camp.total_capacity) * 100) : 0, score, st };
   }).sort((a, b) => b.score - a.score);
 
-  const getDayColor = (d) => d < 1 ? 'text-red-400' : d < 2 ? 'text-amber-400' : d < 3 ? 'text-yellow-400' : 'text-green-400';
-  
-  const getStatusClass = (status) => {
-    if (status === 'critical') return 'status-critical';
-    if (status === 'warning') return 'status-warning';
-    return 'status-stable';
-  };
+  const dayColor = d => d < 1 ? 'var(--danger)' : d < 2 ? 'var(--amber)' : 'var(--green)';
+  const statusCls = s => s === 'critical' ? 'status-critical' : s === 'warning' ? 'status-warning' : 'status-stable';
 
   return (
     <div className="dark-card overflow-hidden">
-      <div className="p-5 border-b border-white/[0.04]">
-        <h3 className="text-lg font-medium text-white">Resource Overview</h3>
-        <p className="text-sm text-neutral-500 mt-1">All camps sorted by priority score</p>
+      <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)' }}>
+        <h3 className="text-[16px] font-bold" style={{ color: 'var(--text-1)' }}>Resource Overview</h3>
+        <p className="text-[12px] mt-1" style={{ color: 'var(--text-3)' }}>All camps sorted by priority score</p>
       </div>
 
       {/* Desktop Table */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full">
           <thead>
-            <tr className="text-left text-xs text-neutral-500 border-b border-white/[0.04] bg-white/[0.02]">
-              <th className="px-5 py-4 font-medium uppercase tracking-wider">Camp</th>
-              <th className="px-4 py-4 text-right font-medium uppercase tracking-wider">Pop.</th>
-              <th className="px-4 py-4 text-right font-medium uppercase tracking-wider">Food</th>
-              <th className="px-4 py-4 text-right font-medium uppercase tracking-wider">Water</th>
-              <th className="px-4 py-4 text-right font-medium uppercase tracking-wider">Med</th>
-              <th className="px-4 py-4 text-right font-medium uppercase tracking-wider">Shelter</th>
-              <th className="px-4 py-4 text-center font-medium uppercase tracking-wider">Status</th>
-              <th className="px-4 py-4 text-right font-medium uppercase tracking-wider">Score</th>
+            <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-2)' }}>
+              {['Camp', 'Pop.', 'Food', 'Water', 'Med', 'Shelter', 'Status', 'Score'].map((h, i) => (
+                <th key={h} className={`text-[11px] font-semibold uppercase tracking-wider ${i === 0 ? 'text-left' : i === 6 ? 'text-center' : 'text-right'}`}
+                  style={{ padding: '14px 20px', color: 'var(--text-4)' }}>{h}</th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/[0.04]">
+          <tbody>
             {campData.map((camp, i) => (
-              <tr key={camp.id}
-                className="hover:bg-white/[0.02] cursor-pointer transition-colors anim-up"
-                style={{ animationDelay: `${i * 40}ms` }}
-                onClick={() => onCampClick?.(camp)}>
-                <td className="px-5 py-4">
-                  <div className="font-medium text-white">{camp.name.replace(' Relief Camp', '')}</div>
-                  <div className="text-xs text-neutral-500 mt-0.5">{camp.village}</div>
+              <tr key={camp.id} className="anim-up cursor-pointer"
+                style={{ animationDelay: `${i * 40}ms`, borderBottom: '1px solid var(--border)' }}
+                onClick={() => onCampClick?.(camp)}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                <td style={{ padding: '16px 20px' }}>
+                  <div className="text-[13px] font-semibold" style={{ color: 'var(--text-1)' }}>{camp.name.replace(' Relief Camp', '')}</div>
+                  <div className="text-[11px] mt-1" style={{ color: 'var(--text-4)' }}>{camp.village}</div>
                 </td>
-                <td className="px-4 py-4 text-right text-neutral-400">{camp.current_population}</td>
-                <td className={`px-4 py-4 text-right font-medium ${getDayColor(camp.food)}`}>{camp.food}d</td>
-                <td className={`px-4 py-4 text-right font-medium ${getDayColor(camp.water)}`}>{camp.water}d</td>
-                <td className={`px-4 py-4 text-right font-medium ${getDayColor(camp.medicine)}`}>{camp.medicine}d</td>
-                <td className="px-4 py-4 text-right">
-                  <span className={camp.shelterPct > 90 ? 'text-red-400' : camp.shelterPct > 70 ? 'text-amber-400' : 'text-green-400'}>
-                    {camp.shelterPct}%
-                  </span>
+                <td className="text-right text-[13px]" style={{ padding: '16px 20px', color: 'var(--text-2)' }}>{camp.current_population}</td>
+                <td className="text-right text-[13px] font-semibold" style={{ padding: '16px 20px', color: dayColor(camp.food) }}>{camp.food}d</td>
+                <td className="text-right text-[13px] font-semibold" style={{ padding: '16px 20px', color: dayColor(camp.water) }}>{camp.water}d</td>
+                <td className="text-right text-[13px] font-semibold" style={{ padding: '16px 20px', color: dayColor(camp.medicine) }}>{camp.medicine}d</td>
+                <td className="text-right text-[13px]" style={{ padding: '16px 20px' }}>
+                  <span style={{ color: camp.shelterPct > 90 ? 'var(--danger)' : camp.shelterPct > 70 ? 'var(--amber)' : 'var(--green)' }}>{camp.shelterPct}%</span>
                 </td>
-                <td className="px-4 py-4 text-center">
-                  <span className={`badge ${getStatusClass(camp.st.status)}`}>
-                    {camp.st.status.toUpperCase()}
-                  </span>
+                <td className="text-center" style={{ padding: '16px 20px' }}>
+                  <span className={`badge ${statusCls(camp.st.status)}`}>{camp.st.label}</span>
                 </td>
-                <td className="px-4 py-4 text-right font-mono font-medium text-white">{camp.score}</td>
+                <td className="text-right text-[13px] font-mono font-bold" style={{ padding: '16px 20px', color: 'var(--text-1)' }}>{camp.score}</td>
               </tr>
             ))}
           </tbody>
@@ -78,42 +66,38 @@ export default function ResourceTable({ camps = seedCamps, resources = seedResou
       </div>
 
       {/* Mobile Cards */}
-      <div className="md:hidden divide-y divide-white/[0.04]">
+      <div className="md:hidden">
         {campData.map((camp, i) => (
-          <div key={camp.id} className="anim-up" style={{ animationDelay: `${i * 40}ms` }}>
-            <button
-              className="w-full p-5 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
+          <div key={camp.id} className="anim-up" style={{ animationDelay: `${i * 40}ms`, borderBottom: '1px solid var(--border)' }}>
+            <button className="w-full flex items-center justify-between text-left" style={{ padding: '16px 20px' }}
               onClick={() => setExpandedId(expandedId === camp.id ? null : camp.id)}
-            >
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="min-w-0">
-                  <div className="font-medium text-white truncate">{camp.name.replace(' Relief Camp', '')}</div>
-                  <div className="text-xs text-neutral-500 mt-1">{camp.village} • {camp.current_population} people</div>
-                </div>
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+              <div>
+                <div className="text-[13px] font-semibold" style={{ color: 'var(--text-1)' }}>{camp.name.replace(' Relief Camp', '')}</div>
+                <div className="text-[11px] mt-1" style={{ color: 'var(--text-4)' }}>{camp.village} · {camp.current_population} people</div>
               </div>
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <span className={`badge ${getStatusClass(camp.st.status)}`}>
-                  {camp.st.status.toUpperCase()}
-                </span>
-                {expandedId === camp.id ? <ChevronUp className="w-4 h-4 text-neutral-500" /> : <ChevronDown className="w-4 h-4 text-neutral-500" />}
+              <div className="flex items-center gap-3">
+                <span className={`badge ${statusCls(camp.st.status)}`}>{camp.st.label}</span>
+                {expandedId === camp.id ? <ChevronUp className="w-4 h-4" style={{ color: 'var(--text-4)' }} /> : <ChevronDown className="w-4 h-4" style={{ color: 'var(--text-4)' }} />}
               </div>
             </button>
             {expandedId === camp.id && (
-              <div className="px-5 pb-5 grid grid-cols-2 gap-3 anim-in">
+              <div className="grid grid-cols-2 gap-3 anim-in" style={{ padding: '0 20px 20px' }}>
                 {[
-                  { label: 'Food', value: `${camp.food}d`, days: camp.food },
-                  { label: 'Water', value: `${camp.water}d`, days: camp.water },
-                  { label: 'Medicine', value: `${camp.medicine}d`, days: camp.medicine },
-                  { label: 'Shelter', value: `${camp.shelterPct}%`, days: camp.shelterPct > 90 ? 0 : 5 },
+                  { label: 'Food', value: `${camp.food}d`, d: camp.food },
+                  { label: 'Water', value: `${camp.water}d`, d: camp.water },
+                  { label: 'Medicine', value: `${camp.medicine}d`, d: camp.medicine },
+                  { label: 'Shelter', value: `${camp.shelterPct}%`, d: camp.shelterPct > 90 ? 0 : 5 },
                 ].map(r => (
-                  <div key={r.label} className="bg-white/[0.02] border border-white/[0.04] rounded-xl p-3 text-center">
-                    <div className="text-xs text-neutral-500">{r.label}</div>
-                    <div className={`text-lg font-medium mt-1 ${getDayColor(r.days)}`}>{r.value}</div>
+                  <div key={r.label} className="text-center" style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px' }}>
+                    <div className="text-[11px] font-medium" style={{ color: 'var(--text-4)' }}>{r.label}</div>
+                    <div className="text-[18px] font-bold mt-1" style={{ color: dayColor(r.d) }}>{r.value}</div>
                   </div>
                 ))}
-                <div className="col-span-2 text-center mt-2">
-                  <span className="text-xs text-neutral-500">Priority Score: </span>
-                  <span className="text-sm font-mono font-medium text-white">{camp.score}</span>
+                <div className="col-span-2 text-center mt-1">
+                  <span className="text-[11px]" style={{ color: 'var(--text-4)' }}>Priority Score: </span>
+                  <span className="text-[13px] font-mono font-bold" style={{ color: 'var(--text-1)' }}>{camp.score}</span>
                 </div>
               </div>
             )}
