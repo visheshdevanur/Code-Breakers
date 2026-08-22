@@ -8,7 +8,7 @@ export function ThemeProvider({ children }) {
       const saved = localStorage.getItem('reliefchain-theme');
       if (saved) return saved;
     }
-    return 'system';
+    return 'dark';
   });
 
   useEffect(() => {
