@@ -48,18 +48,18 @@ export default function SignUpPage({ onAuth }) {
     }
   };
 
-  const inputCls = "w-full bg-slate-700 text-white rounded-lg pl-10 pr-4 py-3 border border-slate-600 focus:border-blue-500 focus:outline-none";
-  const inputNoCls = "w-full bg-slate-700 text-white rounded-lg px-4 py-3 border border-slate-600 focus:border-blue-500 focus:outline-none";
+  const inputCls = "input !pl-11";
+  const inputNoCls = "input";
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
       <div className="max-w-lg w-full">
         <div className="text-center mb-6">
           <Link to="/" className="inline-flex items-center gap-2 mb-3">
             <ShieldAlert className="w-10 h-10 text-red-500" />
           </Link>
           <h1 className="text-3xl font-bold text-white">Join ReliefChain</h1>
-          <p className="text-slate-400 mt-1">Choose your role and start helping today</p>
+          <p className="text-slate-500 mt-1">Choose your role and start helping today</p>
         </div>
 
         {/* Step indicators */}
