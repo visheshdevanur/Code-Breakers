@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { supabase, getCurrentUser, getProfile, signOut } from './lib/supabase';
+import { supabase, getCurrentUser, getProfile, signOut, canAccessDashboard, getBlockReason } from './lib/supabase';
 
 // Layout
 import Header from './components/Layout/Header';
@@ -29,6 +29,7 @@ import DonationTracker from './components/Donor/DonationTracker';
 import CampManager from './components/Admin/CampManager';
 import UserManagement from './components/Admin/UserManagement';
 import AccountStatusScreen from './components/Auth/AccountStatusScreen';
+import NGOApprovalPanel from './components/NGO/NGOApprovalPanel';
 
 import { seedCamps, seedResources } from './lib/seedData';
 
@@ -219,6 +220,7 @@ function NGODashboard({ user, profile }) {
     map: <div className="h-[calc(100vh-80px)]"><DisasterMap /></div>,
     dashboard: <div className="space-y-6"><AlertBanner /><StatsCards /><ResourceCharts /><ResourceTable /></div>,
     recommendations: <RecommendationList />,
+    verify: <NGOApprovalPanel ngoUser={user} />,
   };
 
   return (
@@ -250,10 +252,10 @@ function ProtectedRoute({ user, profile, allowedRoles, children }) {
   if (!user) return <Navigate to="/signin" replace />;
   if (allowedRoles && profile && !allowedRoles.includes(profile.role)) return <Navigate to="/" replace />;
 
-  // Account status gate for NGO, Coordinator, Driver
-  const status = profile?.account_status;
-  if (status && status !== 'approved') {
-    return <AccountStatusScreen status={status} rejectionReason={profile?.rejection_reason} onLogout={() => { window.location.href = '/'; }} />;
+  // Dual approval gate: admin + NGO
+  if (profile && !canAccessDashboard(profile)) {
+    const reason = getBlockReason(profile);
+    return <AccountStatusScreen status={reason} profile={profile} onLogout={() => { window.location.href = '/'; }} />;
   }
 
   return children;

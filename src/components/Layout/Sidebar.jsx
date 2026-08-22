@@ -20,6 +20,7 @@ const navConfig = {
     { id: 'map', label: 'Needs Map', icon: Map },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'recommendations', label: 'AI', icon: Bot },
+    { id: 'verify', label: 'Verify Workers', icon: Users },
   ],
   driver: [
     { id: 'recommendations', label: 'Deliveries', icon: Truck },
