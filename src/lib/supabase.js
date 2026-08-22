@@ -5,28 +5,34 @@ const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+// Roles that require admin approval
+const GATED_ROLES = ['ngo', 'coordinator', 'driver'];
+
 // ─── Sign Up ───
-export async function signUp(email, password, metadata) {
+export async function signUp(email, password, metadata = {}) {
+  const role = metadata.role || 'donor';
+  const accountStatus = GATED_ROLES.includes(role) ? 'pending' : 'approved';
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { role: metadata?.role || 'donor', full_name: metadata?.full_name || '' },
+      data: { role, full_name: metadata.full_name || '', account_status: accountStatus },
     },
   });
   if (error) throw error;
 
-  // If email confirmation is required, user won't be confirmed yet
   if (data.user && !data.user.identities?.length) {
-    throw new Error('This email is already registered. Try signing in instead.');
+    throw new Error('This email is already registered. Try signing in.');
   }
 
-  // Try to insert profile (may fail if profiles table doesn't exist yet)
+  // Insert profile
   if (data.user) {
     try {
       await supabase.from('profiles').insert({
         id: data.user.id,
         email,
+        account_status: accountStatus,
         ...metadata,
       });
     } catch (e) {
@@ -34,7 +40,7 @@ export async function signUp(email, password, metadata) {
     }
   }
 
-  return data;
+  return { ...data, accountStatus };
 }
 
 // ─── Sign In ───
@@ -42,7 +48,7 @@ export async function signIn(email, password) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     if (error.message.includes('Email not confirmed')) {
-      throw new Error('Please check your email and confirm your account before signing in.');
+      throw new Error('Please check your email and confirm your account first.');
     }
     throw error;
   }
@@ -54,21 +60,24 @@ export async function signOut() {
   await supabase.auth.signOut();
 }
 
-// ─── Get Profile ───
+// ─── Get Profile (with metadata fallback) ───
 export async function getProfile(userId) {
   try {
     const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
     if (error || !data) {
-      // Fallback: get role from user metadata
       const { data: { user } } = await supabase.auth.getUser();
-      if (user?.user_metadata?.role) {
-        return { id: userId, role: user.user_metadata.role, full_name: user.user_metadata.full_name || '', email: user.email };
-      }
-      return { id: userId, role: 'donor', email: user?.email || '' };
+      const meta = user?.user_metadata || {};
+      return {
+        id: userId,
+        role: meta.role || 'donor',
+        full_name: meta.full_name || '',
+        email: user?.email || '',
+        account_status: meta.account_status || (GATED_ROLES.includes(meta.role) ? 'pending' : 'approved'),
+      };
     }
     return data;
   } catch {
-    return { id: userId, role: 'donor' };
+    return { id: userId, role: 'donor', account_status: 'approved' };
   }
 }
 
@@ -76,4 +85,29 @@ export async function getProfile(userId) {
 export async function getCurrentUser() {
   const { data: { user } } = await supabase.auth.getUser();
   return user;
+}
+
+// ─── Admin: Get all profiles ───
+export async function getAllProfiles() {
+  const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+  return data || [];
+}
+
+// ─── Admin: Update profile status ───
+export async function updateProfileStatus(userId, status, rejectionReason = null, adminId = null) {
+  const updates = {
+    account_status: status,
+    reviewed_at: new Date().toISOString(),
+  };
+  if (rejectionReason) updates.rejection_reason = rejectionReason;
+  if (adminId) updates.reviewed_by = adminId;
+
+  const { error } = await supabase.from('profiles').update(updates).eq('id', userId);
+  if (error) throw error;
+}
+
+// ─── Admin: Delete profile ───
+export async function deleteProfile(userId) {
+  const { error } = await supabase.from('profiles').delete().eq('id', userId);
+  if (error) throw error;
 }

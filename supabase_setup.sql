@@ -9,10 +9,16 @@ CREATE TABLE IF NOT EXISTS profiles (
   phone TEXT,
   city TEXT,
   role TEXT NOT NULL DEFAULT 'donor',
+  account_status TEXT NOT NULL DEFAULT 'approved',
+  rejection_reason TEXT,
+  reviewed_by UUID,
+  reviewed_at TIMESTAMPTZ,
   organization_name TEXT,
   organization_type TEXT,
+  organization_reg_number TEXT,
   registration_number TEXT,
   document_url TEXT,
+  id_document_url TEXT,
   vehicle_type TEXT,
   vehicle_number TEXT,
   driving_license TEXT,
@@ -21,6 +27,24 @@ CREATE TABLE IF NOT EXISTS profiles (
   availability TEXT DEFAULT 'available',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Auto-set account_status based on role
+CREATE OR REPLACE FUNCTION set_default_account_status()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.role IN ('ngo', 'coordinator', 'driver') THEN
+    NEW.account_status := 'pending';
+  ELSE
+    NEW.account_status := 'approved';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_set_account_status ON profiles;
+CREATE TRIGGER trg_set_account_status
+BEFORE INSERT ON profiles
+FOR EACH ROW EXECUTE FUNCTION set_default_account_status();
 
 -- 2. Camps
 CREATE TABLE IF NOT EXISTS camps (

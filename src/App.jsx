@@ -27,6 +27,8 @@ import MoneyDonationForm from './components/Donor/MoneyDonationForm';
 import ItemDonationForm from './components/Donor/ItemDonationForm';
 import DonationTracker from './components/Donor/DonationTracker';
 import CampManager from './components/Admin/CampManager';
+import UserManagement from './components/Admin/UserManagement';
+import AccountStatusScreen from './components/Auth/AccountStatusScreen';
 
 import { seedCamps, seedResources } from './lib/seedData';
 
@@ -123,6 +125,7 @@ function AdminDashboard({ user, profile }) {
       </div>
     ),
     camps: <CampManager camps={dbCamps} coordinators={coordinators} onRefresh={loadData} />,
+    users: <UserManagement adminUser={user} />,
     donations: (
       <div className="space-y-6">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -246,6 +249,13 @@ function DriverDashboard({ user, profile }) {
 function ProtectedRoute({ user, profile, allowedRoles, children }) {
   if (!user) return <Navigate to="/signin" replace />;
   if (allowedRoles && profile && !allowedRoles.includes(profile.role)) return <Navigate to="/" replace />;
+
+  // Account status gate for NGO, Coordinator, Driver
+  const status = profile?.account_status;
+  if (status && status !== 'approved') {
+    return <AccountStatusScreen status={status} rejectionReason={profile?.rejection_reason} onLogout={() => { window.location.href = '/'; }} />;
+  }
+
   return children;
 }
 

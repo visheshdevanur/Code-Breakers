@@ -1,9 +1,10 @@
-import { LayoutDashboard, Map, Bot, Heart, Zap, ClipboardList, Truck, Eye, MapPin, X } from 'lucide-react';
+import { LayoutDashboard, Map, Bot, Heart, Zap, ClipboardList, Truck, Eye, MapPin, X, Users } from 'lucide-react';
 
 const navConfig = {
   admin: [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'camps', label: 'Manage Camps', icon: MapPin },
+    { id: 'users', label: 'User Management', icon: Users },
     { id: 'map', label: 'Disaster Map', icon: Map },
     { id: 'recommendations', label: 'AI Engine', icon: Bot },
     { id: 'camp-request', label: 'Camp Report', icon: ClipboardList },
