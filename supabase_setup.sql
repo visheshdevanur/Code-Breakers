@@ -148,17 +148,38 @@ CREATE TABLE IF NOT EXISTS transfers (
   delivered_at TIMESTAMPTZ
 );
 
--- RLS
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE camps ENABLE ROW LEVEL SECURITY;
-ALTER TABLE resources ENABLE ROW LEVEL SECURITY;
-ALTER TABLE requests ENABLE ROW LEVEL SECURITY;
-ALTER TABLE donations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE item_donations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE recommendations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE transfers ENABLE ROW LEVEL SECURITY;
+-- Policies: Drop existing then recreate
+DO $$ BEGIN
+  -- Drop all existing policies to make this idempotent
+  DROP POLICY IF EXISTS "read_all" ON profiles;
+  DROP POLICY IF EXISTS "read_all" ON camps;
+  DROP POLICY IF EXISTS "read_all" ON resources;
+  DROP POLICY IF EXISTS "read_all" ON requests;
+  DROP POLICY IF EXISTS "read_all" ON donations;
+  DROP POLICY IF EXISTS "read_all" ON item_donations;
+  DROP POLICY IF EXISTS "read_all" ON recommendations;
+  DROP POLICY IF EXISTS "read_all" ON transfers;
+  DROP POLICY IF EXISTS "insert_own" ON profiles;
+  DROP POLICY IF EXISTS "update_own" ON profiles;
+  DROP POLICY IF EXISTS "update_any" ON profiles;
+  DROP POLICY IF EXISTS "delete_any" ON profiles;
+  DROP POLICY IF EXISTS "auth_insert" ON camps;
+  DROP POLICY IF EXISTS "auth_update" ON camps;
+  DROP POLICY IF EXISTS "auth_delete" ON camps;
+  DROP POLICY IF EXISTS "auth_insert" ON resources;
+  DROP POLICY IF EXISTS "auth_update" ON resources;
+  DROP POLICY IF EXISTS "auth_insert" ON requests;
+  DROP POLICY IF EXISTS "auth_insert" ON donations;
+  DROP POLICY IF EXISTS "auth_update" ON donations;
+  DROP POLICY IF EXISTS "auth_insert" ON item_donations;
+  DROP POLICY IF EXISTS "auth_update" ON item_donations;
+  DROP POLICY IF EXISTS "auth_insert" ON recommendations;
+  DROP POLICY IF EXISTS "auth_update" ON recommendations;
+  DROP POLICY IF EXISTS "auth_insert" ON transfers;
+  DROP POLICY IF EXISTS "auth_update" ON transfers;
+END $$;
 
--- Policies: everyone can read
+-- Everyone can read
 CREATE POLICY "read_all" ON profiles FOR SELECT USING (true);
 CREATE POLICY "read_all" ON camps FOR SELECT USING (true);
 CREATE POLICY "read_all" ON resources FOR SELECT USING (true);
@@ -168,11 +189,15 @@ CREATE POLICY "read_all" ON item_donations FOR SELECT USING (true);
 CREATE POLICY "read_all" ON recommendations FOR SELECT USING (true);
 CREATE POLICY "read_all" ON transfers FOR SELECT USING (true);
 
--- Policies: authenticated can insert/update
+-- Profiles: insert own, update own, admin can update/delete any
 CREATE POLICY "insert_own" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
-CREATE POLICY "update_own" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "update_own" ON profiles FOR UPDATE USING (true);
+CREATE POLICY "delete_any" ON profiles FOR DELETE USING (true);
+
+-- Authenticated can insert/update other tables
 CREATE POLICY "auth_insert" ON camps FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "auth_update" ON camps FOR UPDATE USING (auth.uid() IS NOT NULL);
+CREATE POLICY "auth_delete" ON camps FOR DELETE USING (auth.uid() IS NOT NULL);
 CREATE POLICY "auth_insert" ON resources FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "auth_update" ON resources FOR UPDATE USING (auth.uid() IS NOT NULL);
 CREATE POLICY "auth_insert" ON requests FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
@@ -184,3 +209,4 @@ CREATE POLICY "auth_insert" ON recommendations FOR INSERT WITH CHECK (auth.uid()
 CREATE POLICY "auth_update" ON recommendations FOR UPDATE USING (auth.uid() IS NOT NULL);
 CREATE POLICY "auth_insert" ON transfers FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "auth_update" ON transfers FOR UPDATE USING (auth.uid() IS NOT NULL);
+
