@@ -53,8 +53,7 @@ function DashboardLayout({ user, profile, children }) {
       <Header currentPage={path} userRole={role} onLogout={handleLogout} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex flex-1">
         <Sidebar role={role} currentPage={path} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onNavigate={(p) => {
-          const base = role === 'admin' ? '/admin' : `/${role}`;
-          navigate(`${base}/${p}`);
+          navigate(p);
         }} />
         <main className="flex-1 p-4 sm:p-6 overflow-auto animate-fade-in">
           {children}
