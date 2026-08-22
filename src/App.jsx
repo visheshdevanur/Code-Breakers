@@ -10,6 +10,7 @@ import Sidebar from './components/Layout/Sidebar';
 import LandingPage from './components/Public/LandingPage';
 import SignInPage from './components/Auth/SignInPage';
 import SignUpPage from './components/Auth/SignUpPage';
+import AdminLoginPage from './components/Auth/AdminLoginPage';
 
 // Dashboard components
 import DisasterMap from './components/Map/DisasterMap';
@@ -290,10 +291,10 @@ function AppRoutes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-400">Loading ReliefChain...</p>
+          <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-neutral-500">Loading ReliefChain...</p>
         </div>
       </div>
     );
@@ -306,16 +307,16 @@ function AppRoutes() {
       <Route path="/signin" element={<SignInPage onAuth={handleAuth} />} />
       <Route path="/signup" element={<SignUpPage onAuth={handleAuth} />} />
 
-      {/* Admin Routes (via /admin) */}
+      {/* Admin Routes — shows login page if not authenticated */}
       <Route path="/admin" element={
-        <ProtectedRoute user={user} profile={profile} allowedRoles={['admin']}>
-          <AdminDashboard user={user} profile={profile} />
-        </ProtectedRoute>
+        user && profile?.role === 'admin'
+          ? <AdminDashboard user={user} profile={profile} />
+          : <AdminLoginPage onAuth={handleAuth} />
       } />
       <Route path="/admin/:page" element={
-        <ProtectedRoute user={user} profile={profile} allowedRoles={['admin']}>
-          <AdminDashboard user={user} profile={profile} />
-        </ProtectedRoute>
+        user && profile?.role === 'admin'
+          ? <AdminDashboard user={user} profile={profile} />
+          : <AdminLoginPage onAuth={handleAuth} />
       } />
 
       {/* Coordinator Routes */}
