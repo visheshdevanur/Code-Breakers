@@ -1,334 +1,228 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ShieldAlert, MapPin, Users, Heart, ArrowRight, Eye, Globe, Truck, Zap, Shield, Activity, BarChart3, AlertTriangle, Phone, Map, Bell, Home, Package, Clock, CheckCircle2, Navigation } from 'lucide-react';
-import { seedCamps, seedResources, seedDonations, seedItemDonations } from '../../lib/seedData';
-import { calculatePriorityScore } from '../../lib/aiEngine';
-import DisasterMap from '../Map/DisasterMap';
-
-function Counter({ end, dur = 1200 }) {
-  const [n, setN] = useState(0);
-  useEffect(() => {
-    let v = 0; const s = Math.max(1, Math.ceil(end / (dur / 16)));
-    const t = setInterval(() => { v += s; if (v >= end) { setN(end); clearInterval(t); } else setN(v); }, 16);
-    return () => clearInterval(t);
-  }, [end]);
-  return <>{n.toLocaleString()}</>;
-}
+import { useNavigate } from 'react-router-dom';
+import { ShieldAlert, ArrowRight, MapPin, Users, Package, Heart, Phone, Radio, AlertTriangle, ChevronRight, Activity, Truck, Sun, Moon, Shield, Globe, Zap, BarChart3, Clock } from 'lucide-react';
+import { seedCamps, seedResources, getDaysRemaining } from '../../lib/seedData';
+import { calculatePriorityScore, getStatus } from '../../lib/aiEngine';
+import { useTheme } from '../../lib/ThemeContext';
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+  const { isDark, toggle } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const totalPop = seedCamps.reduce((s, c) => s + c.current_population, 0);
-  const criticals = seedCamps.filter(c => calculatePriorityScore(c, seedResources) > 18).length;
-  const totalDonations = seedDonations.reduce((s, d) => s + d.amount, 0);
+  const criticalCount = seedCamps.filter(c => { const s = calculatePriorityScore(c, seedResources); return getStatus(s).status === 'critical'; }).length;
+
+  const stats = [
+    { value: seedCamps.length, label: 'Active Camps', icon: MapPin, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+    { value: totalPop.toLocaleString(), label: 'People Affected', icon: Users, color: 'text-violet-500', bg: 'bg-violet-500/10' },
+    { value: criticalCount, label: 'Critical Zones', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500/10' },
+    { value: '₹21K', label: 'Donations', icon: Heart, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  ];
+
+  const quickActions = [
+    { label: 'Emergency SOS', icon: Phone, gradient: 'from-red-600 to-red-700', shadow: 'shadow-red-600/20' },
+    { label: 'Report Incident', icon: AlertTriangle, gradient: 'from-amber-500 to-orange-600', shadow: 'shadow-amber-500/20' },
+    { label: 'Find Shelter', icon: Shield, gradient: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
+    { label: 'Live Updates', icon: Activity, gradient: 'from-blue-500 to-blue-600', shadow: 'shadow-blue-500/20' },
+    { label: 'Donate Now', icon: Heart, gradient: 'from-pink-500 to-rose-600', shadow: 'shadow-pink-500/20' },
+    { label: 'Track Relief', icon: Truck, gradient: 'from-violet-500 to-purple-600', shadow: 'shadow-violet-500/20' },
+  ];
+
+  const features = [
+    { icon: Zap, title: 'AI-Powered Routing', desc: 'Intelligent resource allocation using WHO standards and real-time data.' },
+    { icon: Globe, title: 'Real-Time Tracking', desc: 'Live camp monitoring, vehicle tracking, and supply chain visibility.' },
+    { icon: BarChart3, title: 'Predictive Analytics', desc: 'Forecast shortages 72 hours before they become critical.' },
+    { icon: Shield, title: 'Verified Access', desc: 'Multi-level approval ensures only trusted personnel operate.' },
+  ];
+
+  const topCamps = seedCamps.slice(0, 4).map(camp => {
+    const score = calculatePriorityScore(camp, seedResources);
+    const st = getStatus(score);
+    const food = seedResources.find(r => r.camp_id === camp.id && r.resource_type === 'food');
+    return { ...camp, st, foodDays: food ? getDaysRemaining(food) : 0 };
+  });
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-base)' }}>
-
-      {/* ══ NAV ══ */}
+    <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
+      {/* ═══ NAV ═══ */}
       <nav className="glass-nav sticky top-0 z-50">
-        <div className="container-app flex items-center justify-between py-3">
-          <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-red-600 flex items-center justify-center shadow-lg shadow-red-600/20">
+        <div className="container-app flex items-center justify-between py-3.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center shadow-lg shadow-red-600/20">
               <ShieldAlert className="w-5 h-5 text-white" />
             </div>
             <div>
-              <span className="text-lg font-bold text-white block leading-none">ReliefChain</span>
-              <span className="text-[9px] text-neutral-500 hidden sm:block">Disaster Coordination Intelligence</span>
+              <span className="text-base font-extrabold tracking-tight" style={{ color: 'var(--text-1)' }}>ReliefChain</span>
+              <span className="text-[9px] block -mt-0.5 font-medium tracking-wider uppercase" style={{ color: 'var(--text-4)' }}>Disaster Intelligence</span>
             </div>
-          </Link>
-          <div className="flex items-center gap-2">
-            <Link to="/signin" className="hidden sm:block text-neutral-400 hover:text-white px-4 py-2 text-sm font-medium transition-colors">Sign In</Link>
-            <Link to="/signup" className="btn-red !py-2.5 !px-5 !text-sm !rounded-xl">Join Now</Link>
+          </div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <button onClick={toggle} className="p-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all" style={{ color: 'var(--text-3)' }} aria-label="Toggle theme">
+              {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+            </button>
+            <button onClick={() => navigate('/signin')} className="text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all hidden sm:block" style={{ color: 'var(--text-2)' }}>Sign In</button>
+            <button onClick={() => navigate('/signup')} className="btn-red !py-2 !px-5 !text-[13px] !rounded-xl">Join Now</button>
           </div>
         </div>
       </nav>
 
-      {/* ══ HERO ══ */}
+      {/* ═══ HERO ═══ */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-red-600/[0.04] rounded-full blur-[120px]" />
-        </div>
-        <div className="container-app relative py-16 sm:py-24 lg:py-32">
-          <div className="max-w-3xl mx-auto text-center lg:text-left lg:mx-0">
-            <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 rounded-full px-4 py-2 mb-8 anim-up">
-              <span className="relative flex h-2 w-2"><span className="animate-ping absolute h-full w-full rounded-full bg-red-500 opacity-75" /><span className="relative h-2 w-2 rounded-full bg-red-500" /></span>
-              <span className="text-red-400 text-xs font-semibold tracking-wide">LIVE EMERGENCY ACTIVE</span>
+        <div className="absolute inset-0 dot-grid opacity-30" />
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-red-600/[0.03] blur-[120px] -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-blue-600/[0.03] blur-[120px] translate-x-1/3 translate-y-1/3" />
+        
+        <div className="container-app relative pt-16 sm:pt-20 pb-12 sm:pb-16">
+          <div className={`transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-6 anim-pulse-red" style={{ background: 'var(--accent-soft)', borderColor: 'rgba(220,38,38,0.2)' }}>
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-xs font-bold tracking-wide uppercase" style={{ color: 'var(--accent)' }}>Live Emergency Active</span>
             </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.08] mb-6 anim-up d1">
-              <span className="text-white">Be Prepared.</span><br />
-              <span className="text-white">Stay Aware.</span><br />
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.08] tracking-tight max-w-2xl" style={{ color: 'var(--text-1)' }}>
+              Be Prepared.<br />Stay Aware.<br />
               <span className="gradient-text">Stay Safe.</span>
             </h1>
-            <p className="text-neutral-400 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 mb-10 leading-relaxed anim-up d2">
+
+            <p className="mt-5 text-base sm:text-lg max-w-lg leading-relaxed" style={{ color: 'var(--text-3)' }}>
               Coordinating disaster relief across Kerala. Track supplies, find shelters, donate resources — all powered by AI intelligence.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start anim-up d3">
-              <Link to="/signup" className="btn-red !py-4 !px-8 !text-base !rounded-2xl">
-                Get Started <ArrowRight className="w-5 h-5" />
-              </Link>
-              <Link to="/signin" className="btn-dark !py-4 !px-8 !text-base !rounded-2xl">
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button onClick={() => navigate('/signup')} className="btn-red !py-3.5 !px-7 !text-sm group">
+                Get Started <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button onClick={() => navigate('/signin')} className="btn-dark !py-3.5 !px-7 !text-sm">
                 Login / Sign In
-              </Link>
+              </button>
             </div>
-            <p className="text-neutral-600 text-sm mt-4 anim-up d4">Together, we can save lives.</p>
+            <p className="mt-3 text-xs" style={{ color: 'var(--text-4)' }}>Together, we can save lives.</p>
           </div>
         </div>
       </section>
 
-      {/* ══ QUICK ACTIONS GRID ══ */}
-      <section className="py-12 sm:py-16">
-        <div className="container-app">
-          <h2 className="text-lg sm:text-xl font-bold text-white mb-6 anim-up">Quick Actions</h2>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
-            {[
-              { icon: <AlertTriangle className="w-6 h-6 text-white" />, label: 'Emergency\nSOS', bg: 'bg-red-600', href: '/signup' },
-              { icon: <Bell className="w-6 h-6 text-white" />, label: 'Report\nIncident', bg: 'bg-orange-600', href: '/signup' },
-              { icon: <Home className="w-6 h-6 text-white" />, label: 'Find\nShelter', bg: 'bg-green-600', href: '#live-map' },
-              { icon: <Activity className="w-6 h-6 text-white" />, label: 'Live\nUpdates', bg: 'bg-blue-600', href: '#stats' },
-              { icon: <Map className="w-6 h-6 text-white" />, label: 'Disaster\nMap', bg: 'bg-purple-600', href: '#live-map' },
-              { icon: <Phone className="w-6 h-6 text-white" />, label: 'Emergency\nContacts', bg: 'bg-teal-600', href: '/signup' },
-            ].map((a, i) => (
-              <a key={i} href={a.href || '#'} className="flex flex-col items-center gap-2.5 p-4 rounded-2xl hover:bg-white/[0.03] transition-colors anim-up group" style={{ animationDelay: `${i * 60}ms` }}>
-                <div className={`icon-box !w-14 !h-14 !rounded-2xl ${a.bg} shadow-lg group-hover:scale-110 transition-transform`}>{a.icon}</div>
-                <span className="text-[11px] sm:text-xs text-neutral-400 text-center font-medium leading-tight whitespace-pre-line">{a.label}</span>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ ALERT BANNER ══ */}
-      <section className="px-4 sm:px-0 mb-8">
-        <div className="container-app">
-          <div className="bg-gradient-to-r from-red-600/20 via-red-600/10 to-transparent border border-red-600/20 rounded-2xl p-4 sm:p-5 flex items-center gap-4 anim-up">
-            <div className="w-12 h-12 rounded-xl bg-red-600/20 flex items-center justify-center flex-shrink-0 anim-pulse-red">
-              <AlertTriangle className="w-6 h-6 text-red-500" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-red-400 font-bold text-sm">Severe Flood Warning</div>
-              <p className="text-neutral-400 text-xs mt-0.5 truncate">Heavy rainfall expected. {criticals} camp(s) in critical state. Avoid low-lying areas.</p>
-            </div>
-            <Link to="/signup" className="badge bg-red-600/20 text-red-400 border border-red-600/30 flex-shrink-0 hidden sm:block">View Details</Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ══ LIVE STATS ══ */}
-      <section id="stats" className="py-8 sm:py-12">
-        <div className="container-app">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {[
-              { icon: <MapPin className="w-5 h-5 text-blue-400" />, val: seedCamps.length, label: 'Active Camps', iconBg: 'bg-blue-500/10' },
-              { icon: <Users className="w-5 h-5 text-red-400" />, val: totalPop, label: 'People Affected', iconBg: 'bg-red-500/10' },
-              { icon: <AlertTriangle className="w-5 h-5 text-amber-400" />, val: criticals, label: 'Critical Camps', iconBg: 'bg-amber-500/10' },
-              { icon: <Heart className="w-5 h-5 text-emerald-400" />, val: Math.round(totalDonations / 1000), label: 'Donations (₹K)', iconBg: 'bg-emerald-500/10' },
-            ].map((s, i) => (
-              <div key={i} className="dark-card p-5 anim-up" style={{ animationDelay: `${i * 80}ms` }}>
-                <div className={`icon-box !w-10 !h-10 !rounded-xl ${s.iconBg} mb-3`}>{s.icon}</div>
-                <div className="text-2xl sm:text-3xl font-bold text-white"><Counter end={s.val} /></div>
-                <div className="text-xs text-neutral-500 mt-1">{s.label}</div>
+      {/* ═══ QUICK ACTIONS ═══ */}
+      <section className="container-app pb-12 -mt-2">
+        <h2 className="text-sm font-bold uppercase tracking-widest mb-5" style={{ color: 'var(--text-4)' }}>Quick Actions</h2>
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+          {quickActions.map((a, i) => (
+            <button key={a.label} className="group flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl hover:bg-[var(--bg-card)] border border-transparent hover:border-[var(--border)] transition-all anim-up" style={{ animationDelay: `${i * 60}ms` }}>
+              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${a.gradient} flex items-center justify-center shadow-lg ${a.shadow} group-hover:scale-110 transition-transform`}>
+                <a.icon className="w-5 h-5 text-white" />
               </div>
-            ))}
-          </div>
+              <span className="text-[11px] font-semibold leading-tight text-center" style={{ color: 'var(--text-2)' }}>{a.label}</span>
+            </button>
+          ))}
         </div>
       </section>
 
-      {/* ══ ACTIVE CAMPS (Shelter Cards like reference) ══ */}
-      <section className="py-12 sm:py-16">
-        <div className="container-app">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg sm:text-xl font-bold text-white">Active Relief Camps</h2>
-            <a href="#live-map" className="text-xs text-red-400 font-semibold hover:text-red-300 transition-colors">View All →</a>
+      {/* ═══ ALERT BANNER ═══ */}
+      <section className="container-app pb-8">
+        <div className="rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 anim-up" style={{ background: 'var(--accent-soft)', border: '1px solid rgba(220,38,38,0.15)' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center flex-shrink-0 anim-pulse-red">
+              <AlertTriangle className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <div className="text-sm font-bold" style={{ color: 'var(--accent)' }}>Severe Flood Warning</div>
+              <div className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>Heavy rainfall expected. {criticalCount} camp(s) in critical state. Avoid low-lying areas.</div>
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {seedCamps.slice(0, 6).map((camp, i) => {
-              const score = calculatePriorityScore(camp, seedResources);
-              const isCrit = score > 18;
-              const isWarn = score > 12;
-              const res = seedResources.filter(r => r.camp_id === camp.id);
-              return (
-                <div key={camp.id} className="dark-card p-5 anim-up" style={{ animationDelay: `${i * 70}ms` }}>
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`icon-box !w-10 !h-10 !rounded-xl ${isCrit ? 'bg-red-500/10' : isWarn ? 'bg-amber-500/10' : 'bg-emerald-500/10'}`}>
-                        <Home className={`w-5 h-5 ${isCrit ? 'text-red-400' : isWarn ? 'text-amber-400' : 'text-emerald-400'}`} />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-white text-sm">{camp.name.replace(' Relief Camp', '')}</div>
-                        <div className="text-[11px] text-neutral-500">{camp.village} · {camp.current_population} people</div>
-                      </div>
+          <button className="text-xs font-bold px-4 py-2 rounded-xl whitespace-nowrap" style={{ background: 'var(--accent)', color: '#fff' }}>View Details</button>
+        </div>
+      </section>
+
+      {/* ═══ STATS ═══ */}
+      <section className="container-app pb-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {stats.map((s, i) => (
+            <div key={s.label} className="dark-card p-5 flex items-center gap-4 anim-up" style={{ animationDelay: `${i * 80}ms` }}>
+              <div className={`icon-box ${s.bg} ${s.color} !w-11 !h-11 !rounded-xl`}><s.icon className="w-5 h-5" /></div>
+              <div>
+                <div className="text-2xl font-black tracking-tight" style={{ color: 'var(--text-1)' }}>{s.value}</div>
+                <div className="text-[11px] font-medium" style={{ color: 'var(--text-4)' }}>{s.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ ACTIVE CAMPS ═══ */}
+      <section className="container-app pb-12">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-bold" style={{ color: 'var(--text-1)' }}>Active Relief Camps</h2>
+          <button className="text-xs font-semibold flex items-center gap-1 hover:gap-2 transition-all" style={{ color: 'var(--accent)' }}>
+            View All <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {topCamps.map((camp, i) => (
+            <div key={camp.id} className="dark-card p-5 anim-up group" style={{ animationDelay: `${i * 80}ms` }}>
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-2 h-2 rounded-full ${camp.st.status === 'critical' ? 'bg-red-500 animate-pulse' : camp.st.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                  <div>
+                    <div className="text-sm font-bold" style={{ color: 'var(--text-1)' }}>{camp.name}</div>
+                    <div className="text-[11px] flex items-center gap-1 mt-0.5" style={{ color: 'var(--text-4)' }}>
+                      <MapPin className="w-3 h-3" /> {camp.village} · {camp.current_population} people
                     </div>
-                    <span className={`badge ${isCrit ? 'bg-red-500/15 text-red-400 border border-red-500/25' : isWarn ? 'bg-amber-500/15 text-amber-400 border border-amber-500/25' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/25'}`}>
-                      {isCrit ? 'Critical' : isWarn ? 'Warning' : 'Stable'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-white/[0.04]">
-                    {res.map(r => {
-                      const icons = { food: '🍚', water: '💧', medicine: '💊', shelter: '🏠' };
-                      return (
-                        <div key={r.resource_type} className="flex items-center gap-1 bg-white/[0.03] rounded-lg px-2 py-1">
-                          <span className="text-xs">{icons[r.resource_type]}</span>
-                          <span className="text-[10px] text-neutral-400 font-medium">{Math.round(r.quantity)}</span>
-                        </div>
-                      );
-                    })}
-                    <Link to="/signup" className="ml-auto w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center hover:bg-blue-500/20 transition-colors">
-                      <Navigation className="w-3.5 h-3.5 text-blue-400" />
-                    </Link>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ HOW YOU CAN HELP ══ */}
-      <section className="py-16 sm:py-20">
-        <div className="container-app">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">How You Can Help</h2>
-            <p className="text-neutral-500 max-w-md mx-auto text-sm">Join the relief effort. Every role saves lives.</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="dark-card p-7 anim-up">
-              <div className="icon-box !w-14 !h-14 !rounded-2xl bg-emerald-500/10 mb-5"><Heart className="w-7 h-7 text-emerald-400" /></div>
-              <div className="text-[10px] font-bold text-emerald-400 tracking-[0.15em] mb-1">CITIZEN / DONOR</div>
-              <h3 className="text-lg font-bold text-white mb-2">Donate</h3>
-              <p className="text-sm text-neutral-500 leading-relaxed">Give money or items — clothes, food, blankets, medicine. Track every rupee to delivery.</p>
-            </div>
-            <div className="dark-card p-7 anim-up d1">
-              <div className="icon-box !w-14 !h-14 !rounded-2xl bg-violet-500/10 mb-5"><Globe className="w-7 h-7 text-violet-400" /></div>
-              <div className="text-[10px] font-bold text-violet-400 tracking-[0.15em] mb-1">NGO / GOVERNMENT</div>
-              <h3 className="text-lg font-bold text-white mb-2">Coordinate</h3>
-              <p className="text-sm text-neutral-500 leading-relaxed">Dispatch supplies, see real-time needs, and avoid sending duplicate resources.</p>
-            </div>
-            <div className="dark-card p-7 anim-up d2">
-              <div className="icon-box !w-14 !h-14 !rounded-2xl bg-amber-500/10 mb-5"><Truck className="w-7 h-7 text-amber-400" /></div>
-              <div className="text-[10px] font-bold text-amber-400 tracking-[0.15em] mb-1">VOLUNTEER DRIVER</div>
-              <h3 className="text-lg font-bold text-white mb-2">Transport</h3>
-              <p className="text-sm text-neutral-500 leading-relaxed">Register your vehicle and deliver supplies. AI assigns the most efficient routes.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══ AI FEATURES ══ */}
-      <section className="py-16 sm:py-20 border-y border-white/[0.04]">
-        <div className="container-app">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-red-600/10 border border-red-600/20 rounded-full px-4 py-1.5 mb-4">
-              <Zap className="w-3.5 h-3.5 text-red-400" />
-              <span className="text-red-400 text-xs font-semibold">AI-POWERED</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Intelligent Relief Coordination</h2>
-            <p className="text-neutral-500 max-w-md mx-auto text-sm">6 coordination failures that cost lives. All solved.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {[
-              { icon: <Eye className="w-5 h-5 text-blue-400" />, bg: 'bg-blue-500/10', t: 'Live Visibility', d: 'Real-time map of which camps have what resources.' },
-              { icon: <Zap className="w-5 h-5 text-red-400" />, bg: 'bg-red-500/10', t: 'AI Redistribution', d: 'Auto-generates transfers from surplus to critical.' },
-              { icon: <Shield className="w-5 h-5 text-amber-400" />, bg: 'bg-amber-500/10', t: 'Duplication Detection', d: 'Catches when 2 NGOs send to the same camp.' },
-              { icon: <Activity className="w-5 h-5 text-orange-400" />, bg: 'bg-orange-500/10', t: 'Forgotten Zones', d: 'Detects camps that received ZERO supplies.' },
-              { icon: <Truck className="w-5 h-5 text-violet-400" />, bg: 'bg-violet-500/10', t: 'Transport Tracking', d: 'Assigns vehicles, tracks routes, confirms delivery.' },
-              { icon: <BarChart3 className="w-5 h-5 text-emerald-400" />, bg: 'bg-emerald-500/10', t: 'Full Transparency', d: 'Every rupee tracked from source to delivery.' },
-            ].map((f, i) => (
-              <div key={i} className="dark-card p-5 flex gap-4 items-start anim-up" style={{ animationDelay: `${i * 70}ms` }}>
-                <div className={`icon-box !w-10 !h-10 !rounded-xl ${f.bg} flex-shrink-0`}>{f.icon}</div>
-                <div>
-                  <h4 className="font-semibold text-white text-sm">{f.t}</h4>
-                  <p className="text-xs text-neutral-500 mt-1 leading-relaxed">{f.d}</p>
+                <span className={`badge border text-[10px] ${camp.st.status === 'critical' ? 'bg-red-500/10 text-red-500 border-red-500/20' : camp.st.status === 'warning' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
+                  {camp.st.label}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-3">
+                <div className="rounded-lg p-2 text-center" style={{ background: 'var(--bg-2)' }}>
+                  <div className="text-[10px] font-medium" style={{ color: 'var(--text-4)' }}>Food</div>
+                  <div className={`text-sm font-bold ${camp.foodDays < 1 ? 'text-red-500' : camp.foodDays < 2 ? 'text-amber-500' : 'text-emerald-500'}`}>{camp.foodDays}d</div>
+                </div>
+                <div className="rounded-lg p-2 text-center" style={{ background: 'var(--bg-2)' }}>
+                  <div className="text-[10px] font-medium" style={{ color: 'var(--text-4)' }}>Priority</div>
+                  <div className="text-sm font-bold" style={{ color: 'var(--text-1)' }}>{camp.st.score || '—'}</div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* ══ LIVE MAP ══ */}
-      <section id="live-map" className="py-16 sm:py-24">
-        <div className="container-app">
+      {/* ═══ FEATURES ═══ */}
+      <section className="border-t" style={{ borderColor: 'var(--border)' }}>
+        <div className="container-app py-16">
           <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Disaster Map</h2>
-            <p className="text-neutral-500 text-sm">Click any marker for real-time camp details.</p>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight" style={{ color: 'var(--text-1)' }}>Built for Real Emergencies</h2>
+            <p className="mt-2 text-sm max-w-md mx-auto" style={{ color: 'var(--text-3)' }}>Not a prototype. A production-grade disaster response coordination platform.</p>
           </div>
-          <div className="h-[350px] sm:h-[450px] lg:h-[550px] rounded-2xl overflow-hidden border border-white/[0.06] shadow-2xl shadow-black/40">
-            <DisasterMap />
-          </div>
-        </div>
-      </section>
-
-      {/* ══ RECENT DONATIONS ══ */}
-      <section className="py-12 sm:py-16 border-t border-white/[0.04]">
-        <div className="container-app max-w-3xl">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-white">Recent Contributions</h2>
-            <Link to="/signup" className="text-xs text-red-400 font-semibold">Donate Now →</Link>
-          </div>
-          <div className="space-y-2">
-            {[...seedDonations.map(d => ({ n: d.donor_name, t: `₹${d.amount.toLocaleString()} · ${d.resource_type}`, c: d.allocated_camp, m: true })),
-              ...seedItemDonations.slice(0, 3).map(d => ({ n: d.donor_name, t: `${d.quantity} ${d.item_category}`, c: d.allocated_camp, m: false }))
-            ].map((d, i) => (
-              <div key={i} className="dark-card !rounded-xl px-4 py-3 flex items-center gap-3 anim-up" style={{ animationDelay: `${i * 50}ms` }}>
-                <div className={`icon-box !w-9 !h-9 !rounded-lg ${d.m ? 'bg-emerald-500/10' : 'bg-violet-500/10'}`}>
-                  {d.m ? <Heart className="w-4 h-4 text-emerald-400" /> : <Package className="w-4 h-4 text-violet-400" />}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {features.map((f, i) => (
+              <div key={f.title} className="dark-card p-6 text-center group anim-up" style={{ animationDelay: `${i * 80}ms` }}>
+                <div className="icon-box bg-red-500/10 !w-14 !h-14 !rounded-2xl mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <f.icon className="w-6 h-6 text-red-500" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="font-medium text-white text-sm">{d.n}</span>
-                  <span className="text-neutral-500 text-sm ml-2">{d.t}</span>
-                </div>
-                <span className="text-[10px] text-neutral-600 hidden sm:block">→ {d.c}</span>
+                <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--text-1)' }}>{f.title}</h3>
+                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-3)' }}>{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ══ BOTTOM FEATURES BAR (like reference) ══ */}
-      <section className="py-10 border-t border-white/[0.04]">
-        <div className="container-app">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-            {[
-              { icon: <Bell className="w-5 h-5 text-red-400" />, t: 'Real-time Alerts', d: 'Stay informed about emergencies' },
-              { icon: <AlertTriangle className="w-5 h-5 text-orange-400" />, t: 'Quick SOS', d: 'Send SOS and get help instantly' },
-              { icon: <Map className="w-5 h-5 text-blue-400" />, t: 'Live Map', d: 'Track disasters in real-time' },
-              { icon: <Home className="w-5 h-5 text-green-400" />, t: 'Find Shelters', d: 'Locate safe shelters nearby' },
-              { icon: <Globe className="w-5 h-5 text-violet-400" />, t: 'Stay Connected', d: 'Access contacts and resources' },
-            ].map((f, i) => (
-              <div key={i} className="flex flex-col items-center text-center gap-2 anim-up" style={{ animationDelay: `${i * 60}ms` }}>
-                <div className="icon-box !w-11 !h-11 !rounded-xl bg-white/[0.04]">{f.icon}</div>
-                <div className="text-xs font-semibold text-white">{f.t}</div>
-                <div className="text-[10px] text-neutral-600 leading-snug">{f.d}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══ CTA ══ */}
-      <section className="py-16">
-        <div className="container-app">
-          <div className="dark-card !rounded-3xl p-8 sm:p-14 text-center bg-gradient-to-br from-red-600/[0.06] to-transparent !border-red-600/10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">Ready to Save Lives?</h2>
-            <p className="text-neutral-500 mb-8 max-w-md mx-auto text-sm">Whether you donate ₹100 or drive a truck — every action matters.</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link to="/signup" className="btn-red !py-3.5 !px-8 !rounded-2xl">Get Started <ArrowRight className="w-4 h-4" /></Link>
-              <Link to="/signin" className="btn-dark !py-3.5 !px-8 !rounded-2xl">Sign In</Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══ FOOTER ══ */}
-      <footer className="py-8 border-t border-white/[0.04]">
-        <div className="container-app flex flex-col sm:flex-row items-center justify-between gap-4">
+      {/* ═══ FOOTER ═══ */}
+      <footer className="border-t py-8" style={{ borderColor: 'var(--border)' }}>
+        <div className="container-app flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-red-600 flex items-center justify-center"><ShieldAlert className="w-3.5 h-3.5 text-white" /></div>
-            <span className="font-bold text-white text-sm">ReliefChain</span>
+            <div className="w-6 h-6 rounded-lg bg-red-600 flex items-center justify-center">
+              <ShieldAlert className="w-3 h-3 text-white" />
+            </div>
+            <span className="text-xs font-bold" style={{ color: 'var(--text-3)' }}>ReliefChain © 2026</span>
           </div>
-          <p className="text-[11px] text-neutral-700 text-center">Together, we can save lives. · Built for Hackathon 2026</p>
-          <div className="flex gap-4">
-            <Link to="/signin" className="text-xs text-neutral-600 hover:text-white transition-colors">Sign In</Link>
-            <Link to="/signup" className="text-xs text-neutral-600 hover:text-white transition-colors">Sign Up</Link>
+          <div className="flex items-center gap-4 text-[11px] font-medium" style={{ color: 'var(--text-4)' }}>
+            <span>Made for Kerala Flood Relief</span>
+            <span>·</span>
+            <span>Built with ❤️ by Code Breakers</span>
           </div>
         </div>
       </footer>
