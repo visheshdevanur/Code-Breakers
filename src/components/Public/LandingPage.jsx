@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShieldAlert, ArrowRight, MapPin, Users, Package, Heart, Phone, Radio, AlertTriangle, ChevronRight, Activity, Truck, Sun, Moon, Shield, Globe, Zap, BarChart3, Clock } from 'lucide-react';
+import { ShieldAlert, ArrowRight, MapPin, Users, Heart, AlertTriangle, ChevronRight, Activity, Truck, Sun, Moon, Shield, Globe, Zap, BarChart3, Phone, ExternalLink } from 'lucide-react';
 import { seedCamps, seedResources, getDaysRemaining } from '../../lib/seedData';
 import { calculatePriorityScore, getStatus } from '../../lib/aiEngine';
 import { useTheme } from '../../lib/ThemeContext';
@@ -12,29 +12,29 @@ export default function LandingPage() {
   useEffect(() => setMounted(true), []);
 
   const totalPop = seedCamps.reduce((s, c) => s + c.current_population, 0);
-  const criticalCount = seedCamps.filter(c => { const s = calculatePriorityScore(c, seedResources); return getStatus(s).status === 'critical'; }).length;
+  const criticalCount = seedCamps.filter(c => getStatus(calculatePriorityScore(c, seedResources)).status === 'critical').length;
 
   const stats = [
-    { value: seedCamps.length, label: 'Active Camps', icon: MapPin, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-    { value: totalPop.toLocaleString(), label: 'People Affected', icon: Users, color: 'text-violet-500', bg: 'bg-violet-500/10' },
-    { value: criticalCount, label: 'Critical Zones', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500/10' },
-    { value: '₹21K', label: 'Donations', icon: Heart, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+    { value: seedCamps.length, label: 'Active Camps', icon: MapPin, color: 'var(--blue)' },
+    { value: totalPop.toLocaleString(), label: 'People Affected', icon: Users, color: 'var(--violet)' },
+    { value: criticalCount, label: 'Critical Alerts', icon: AlertTriangle, color: 'var(--danger)' },
+    { value: '₹21K', label: 'Donations', icon: Heart, color: 'var(--green)' },
   ];
 
-  const quickActions = [
-    { label: 'Emergency SOS', icon: Phone, gradient: 'from-red-600 to-red-700', shadow: 'shadow-red-600/20' },
-    { label: 'Report Incident', icon: AlertTriangle, gradient: 'from-amber-500 to-orange-600', shadow: 'shadow-amber-500/20' },
-    { label: 'Find Shelter', icon: Shield, gradient: 'from-emerald-500 to-emerald-600', shadow: 'shadow-emerald-500/20' },
-    { label: 'Live Updates', icon: Activity, gradient: 'from-blue-500 to-blue-600', shadow: 'shadow-blue-500/20' },
-    { label: 'Donate Now', icon: Heart, gradient: 'from-pink-500 to-rose-600', shadow: 'shadow-pink-500/20' },
-    { label: 'Track Relief', icon: Truck, gradient: 'from-violet-500 to-purple-600', shadow: 'shadow-violet-500/20' },
+  const actions = [
+    { label: 'Emergency SOS', icon: Phone, desc: 'Send distress signal' },
+    { label: 'Report Incident', icon: AlertTriangle, desc: 'Log a new event' },
+    { label: 'Find Shelter', icon: Shield, desc: 'Locate nearest camp' },
+    { label: 'Live Tracking', icon: Activity, desc: 'Real-time updates' },
+    { label: 'Donate', icon: Heart, desc: 'Contribute supplies' },
+    { label: 'Relief Map', icon: Globe, desc: 'View all operations' },
   ];
 
   const features = [
-    { icon: Zap, title: 'AI-Powered Routing', desc: 'Intelligent resource allocation using WHO standards and real-time data.' },
-    { icon: Globe, title: 'Real-Time Tracking', desc: 'Live camp monitoring, vehicle tracking, and supply chain visibility.' },
-    { icon: BarChart3, title: 'Predictive Analytics', desc: 'Forecast shortages 72 hours before they become critical.' },
-    { icon: Shield, title: 'Verified Access', desc: 'Multi-level approval ensures only trusted personnel operate.' },
+    { icon: Zap, title: 'AI-Powered Allocation', desc: 'WHO-standard algorithms prioritize resource distribution automatically.' },
+    { icon: Globe, title: 'Real-Time Visibility', desc: 'Track every camp, vehicle, and supply unit on a single dashboard.' },
+    { icon: BarChart3, title: 'Predictive Alerts', desc: 'Get 72-hour shortage forecasts before situations become critical.' },
+    { icon: Shield, title: 'Verified Access', desc: 'Multi-level admin and NGO approval for all operational roles.' },
   ];
 
   const topCamps = seedCamps.slice(0, 4).map(camp => {
@@ -46,184 +46,181 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      {/* ═══ NAV ═══ */}
+      {/* NAV */}
       <nav className="glass-nav sticky top-0 z-50">
-        <div className="container-app flex items-center justify-between py-3.5">
+        <div className="container-app flex items-center justify-between h-14">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center shadow-lg shadow-red-600/20">
-              <ShieldAlert className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--accent)' }}>
+              <ShieldAlert className="w-4 h-4 text-white" />
             </div>
-            <div>
-              <span className="text-base font-extrabold tracking-tight" style={{ color: 'var(--text-1)' }}>ReliefChain</span>
-              <span className="text-[9px] block -mt-0.5 font-medium tracking-wider uppercase" style={{ color: 'var(--text-4)' }}>Disaster Intelligence</span>
-            </div>
+            <span className="text-[15px] font-bold tracking-tight" style={{ color: 'var(--text-1)' }}>ReliefChain</span>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <button onClick={toggle} className="p-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all" style={{ color: 'var(--text-3)' }} aria-label="Toggle theme">
-              {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
+          <div className="flex items-center gap-2">
+            <button onClick={toggle} className="p-2 rounded-lg transition-colors" style={{ color: 'var(--text-3)' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-            <button onClick={() => navigate('/signin')} className="text-sm font-semibold px-4 py-2 rounded-xl hover:bg-[var(--bg-hover)] transition-all hidden sm:block" style={{ color: 'var(--text-2)' }}>Sign In</button>
-            <button onClick={() => navigate('/signup')} className="btn-red !py-2 !px-5 !text-[13px] !rounded-xl">Join Now</button>
+            <button onClick={() => navigate('/signin')} className="text-sm font-medium px-3 py-1.5 rounded-lg hidden sm:block" style={{ color: 'var(--text-2)' }}
+              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>Sign In</button>
+            <button onClick={() => navigate('/signup')} className="btn-red !py-2 !px-4 !text-[13px] !rounded-lg">Get Started</button>
           </div>
         </div>
       </nav>
 
-      {/* ═══ HERO ═══ */}
+      {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 dot-grid opacity-30" />
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full bg-red-600/[0.03] blur-[120px] -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-blue-600/[0.03] blur-[120px] translate-x-1/3 translate-y-1/3" />
-        
-        <div className="container-app relative pt-16 sm:pt-20 pb-12 sm:pb-16">
-          <div className={`transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-6 anim-pulse-red" style={{ background: 'var(--accent-soft)', borderColor: 'rgba(220,38,38,0.2)' }}>
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-xs font-bold tracking-wide uppercase" style={{ color: 'var(--accent)' }}>Live Emergency Active</span>
+        <div className="absolute inset-0 grid-pattern" />
+        <div className="container-app relative pt-20 pb-16 sm:pt-28 sm:pb-20">
+          <div className={`max-w-2xl transition-all duration-700 ease-out ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-8" style={{ background: 'var(--danger-soft)', border: '1px solid rgba(239,68,68,0.12)' }}>
+              <span className="w-1.5 h-1.5 rounded-full anim-pulse-red" style={{ background: 'var(--danger)' }} />
+              <span className="text-[11px] font-semibold tracking-wide uppercase" style={{ color: 'var(--danger)' }}>Live Emergency Active</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.08] tracking-tight max-w-2xl" style={{ color: 'var(--text-1)' }}>
-              Be Prepared.<br />Stay Aware.<br />
-              <span className="gradient-text">Stay Safe.</span>
+            <h1 className="text-[40px] sm:text-[56px] lg:text-[64px] font-black leading-[1.05] tracking-[-0.03em]" style={{ color: 'var(--text-1)' }}>
+              Disaster Relief,<br />
+              <span className="gradient-text">Intelligently Coordinated.</span>
             </h1>
 
-            <p className="mt-5 text-base sm:text-lg max-w-lg leading-relaxed" style={{ color: 'var(--text-3)' }}>
-              Coordinating disaster relief across Kerala. Track supplies, find shelters, donate resources — all powered by AI intelligence.
+            <p className="mt-6 text-[16px] sm:text-[18px] leading-relaxed max-w-lg" style={{ color: 'var(--text-3)' }}>
+              Track supplies, coordinate shelters, and allocate resources across Kerala's flood relief operations — powered by AI.
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <button onClick={() => navigate('/signup')} className="btn-red !py-3.5 !px-7 !text-sm group">
-                Get Started <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              <button onClick={() => navigate('/signup')} className="btn-red !py-3 !px-6 group">
+                Get Started <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </button>
-              <button onClick={() => navigate('/signin')} className="btn-dark !py-3.5 !px-7 !text-sm">
-                Login / Sign In
+              <button onClick={() => navigate('/signin')} className="btn-dark !py-3 !px-6">
+                Sign In
               </button>
             </div>
-            <p className="mt-3 text-xs" style={{ color: 'var(--text-4)' }}>Together, we can save lives.</p>
           </div>
         </div>
       </section>
 
-      {/* ═══ QUICK ACTIONS ═══ */}
-      <section className="container-app pb-12 -mt-2">
-        <h2 className="text-sm font-bold uppercase tracking-widest mb-5" style={{ color: 'var(--text-4)' }}>Quick Actions</h2>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-          {quickActions.map((a, i) => (
-            <button key={a.label} className="group flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl hover:bg-[var(--bg-card)] border border-transparent hover:border-[var(--border)] transition-all anim-up" style={{ animationDelay: `${i * 60}ms` }}>
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${a.gradient} flex items-center justify-center shadow-lg ${a.shadow} group-hover:scale-110 transition-transform`}>
-                <a.icon className="w-5 h-5 text-white" />
+      {/* STATS */}
+      <section className="container-app pb-16">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {stats.map((s, i) => (
+            <div key={s.label} className="dark-card p-5 anim-up" style={{ animationDelay: `${i * 60}ms` }}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="icon-box !w-10 !h-10 !rounded-lg" style={{ background: 'var(--accent-soft)' }}>
+                  <s.icon className="w-[18px] h-[18px]" style={{ color: s.color }} />
+                </div>
               </div>
-              <span className="text-[11px] font-semibold leading-tight text-center" style={{ color: 'var(--text-2)' }}>{a.label}</span>
+              <div className="text-[28px] font-black tracking-tight leading-none" style={{ color: 'var(--text-1)' }}>{s.value}</div>
+              <div className="text-[12px] font-medium mt-1" style={{ color: 'var(--text-3)' }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ALERT */}
+      <section className="container-app pb-12">
+        <div className="dark-card p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 anim-up" style={{ borderColor: 'rgba(239,68,68,0.15)' }}>
+          <div className="flex items-center gap-3 flex-1">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'var(--danger-soft)' }}>
+              <AlertTriangle className="w-5 h-5" style={{ color: 'var(--danger)' }} />
+            </div>
+            <div>
+              <div className="text-[13px] font-bold" style={{ color: 'var(--text-1)' }}>Severe Flood Warning — Kerala</div>
+              <div className="text-[12px] mt-0.5" style={{ color: 'var(--text-3)' }}>Heavy rainfall expected. {criticalCount} camp(s) critically low on supplies.</div>
+            </div>
+          </div>
+          <button className="btn-red !py-2 !px-4 !text-[12px] !rounded-lg whitespace-nowrap">
+            View Details <ExternalLink className="w-3 h-3" />
+          </button>
+        </div>
+      </section>
+
+      {/* QUICK ACTIONS */}
+      <section className="container-app pb-16">
+        <h2 className="text-[13px] font-semibold uppercase tracking-widest mb-5" style={{ color: 'var(--text-4)' }}>Quick Actions</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          {actions.map((a, i) => (
+            <button key={a.label} className="dark-card p-4 text-left group anim-up" style={{ animationDelay: `${i * 50}ms` }}>
+              <div className="icon-box !w-10 !h-10 !rounded-lg mb-3" style={{ background: 'var(--accent-soft)' }}>
+                <a.icon className="w-[18px] h-[18px]" style={{ color: 'var(--accent)' }} />
+              </div>
+              <div className="text-[13px] font-semibold" style={{ color: 'var(--text-1)' }}>{a.label}</div>
+              <div className="text-[11px] mt-0.5" style={{ color: 'var(--text-4)' }}>{a.desc}</div>
             </button>
           ))}
         </div>
       </section>
 
-      {/* ═══ ALERT BANNER ═══ */}
-      <section className="container-app pb-8">
-        <div className="rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 anim-up" style={{ background: 'var(--accent-soft)', border: '1px solid rgba(220,38,38,0.15)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center flex-shrink-0 anim-pulse-red">
-              <AlertTriangle className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <div className="text-sm font-bold" style={{ color: 'var(--accent)' }}>Severe Flood Warning</div>
-              <div className="text-xs mt-0.5" style={{ color: 'var(--text-3)' }}>Heavy rainfall expected. {criticalCount} camp(s) in critical state. Avoid low-lying areas.</div>
-            </div>
-          </div>
-          <button className="text-xs font-bold px-4 py-2 rounded-xl whitespace-nowrap" style={{ background: 'var(--accent)', color: '#fff' }}>View Details</button>
-        </div>
-      </section>
-
-      {/* ═══ STATS ═══ */}
-      <section className="container-app pb-10">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {stats.map((s, i) => (
-            <div key={s.label} className="dark-card p-5 flex items-center gap-4 anim-up" style={{ animationDelay: `${i * 80}ms` }}>
-              <div className={`icon-box ${s.bg} ${s.color} !w-11 !h-11 !rounded-xl`}><s.icon className="w-5 h-5" /></div>
-              <div>
-                <div className="text-2xl font-black tracking-tight" style={{ color: 'var(--text-1)' }}>{s.value}</div>
-                <div className="text-[11px] font-medium" style={{ color: 'var(--text-4)' }}>{s.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ═══ ACTIVE CAMPS ═══ */}
-      <section className="container-app pb-12">
+      {/* CAMPS */}
+      <section className="container-app pb-16">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold" style={{ color: 'var(--text-1)' }}>Active Relief Camps</h2>
-          <button className="text-xs font-semibold flex items-center gap-1 hover:gap-2 transition-all" style={{ color: 'var(--accent)' }}>
+          <h2 className="text-[17px] font-bold" style={{ color: 'var(--text-1)' }}>Active Relief Camps</h2>
+          <button className="text-[12px] font-medium flex items-center gap-1" style={{ color: 'var(--accent)' }}>
             View All <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {topCamps.map((camp, i) => (
-            <div key={camp.id} className="dark-card p-5 anim-up group" style={{ animationDelay: `${i * 80}ms` }}>
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2.5">
-                  <div className={`w-2 h-2 rounded-full ${camp.st.status === 'critical' ? 'bg-red-500 animate-pulse' : camp.st.status === 'warning' ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+          {topCamps.map((camp, i) => {
+            const statusColors = { critical: 'var(--danger)', warning: 'var(--amber)', stable: 'var(--green)', watch: 'var(--amber)' };
+            const statusBg = { critical: 'var(--danger-soft)', warning: 'var(--amber-soft)', stable: 'var(--green-soft)', watch: 'var(--amber-soft)' };
+            return (
+              <div key={camp.id} className="dark-card p-5 anim-up" style={{ animationDelay: `${i * 60}ms` }}>
+                <div className="flex items-start justify-between mb-4">
                   <div>
-                    <div className="text-sm font-bold" style={{ color: 'var(--text-1)' }}>{camp.name}</div>
-                    <div className="text-[11px] flex items-center gap-1 mt-0.5" style={{ color: 'var(--text-4)' }}>
-                      <MapPin className="w-3 h-3" /> {camp.village} · {camp.current_population} people
+                    <div className="text-[14px] font-semibold" style={{ color: 'var(--text-1)' }}>{camp.name}</div>
+                    <div className="text-[11px] flex items-center gap-1 mt-1" style={{ color: 'var(--text-4)' }}>
+                      <MapPin className="w-3 h-3" /> {camp.village}
                     </div>
                   </div>
+                  <span className="badge" style={{ background: statusBg[camp.st.status], color: statusColors[camp.st.status] }}>{camp.st.label}</span>
                 </div>
-                <span className={`badge border text-[10px] ${camp.st.status === 'critical' ? 'bg-red-500/10 text-red-500 border-red-500/20' : camp.st.status === 'warning' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'}`}>
-                  {camp.st.label}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2 mt-3">
-                <div className="rounded-lg p-2 text-center" style={{ background: 'var(--bg-2)' }}>
-                  <div className="text-[10px] font-medium" style={{ color: 'var(--text-4)' }}>Food</div>
-                  <div className={`text-sm font-bold ${camp.foodDays < 1 ? 'text-red-500' : camp.foodDays < 2 ? 'text-amber-500' : 'text-emerald-500'}`}>{camp.foodDays}d</div>
-                </div>
-                <div className="rounded-lg p-2 text-center" style={{ background: 'var(--bg-2)' }}>
-                  <div className="text-[10px] font-medium" style={{ color: 'var(--text-4)' }}>Priority</div>
-                  <div className="text-sm font-bold" style={{ color: 'var(--text-1)' }}>{camp.st.score || '—'}</div>
+                <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid var(--border)' }}>
+                  <div>
+                    <div className="text-[11px]" style={{ color: 'var(--text-4)' }}>Population</div>
+                    <div className="text-[15px] font-bold" style={{ color: 'var(--text-1)' }}>{camp.current_population}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[11px]" style={{ color: 'var(--text-4)' }}>Food Left</div>
+                    <div className="text-[15px] font-bold" style={{ color: camp.foodDays < 1 ? 'var(--danger)' : camp.foodDays < 2 ? 'var(--amber)' : 'var(--green)' }}>{camp.foodDays}d</div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
-      {/* ═══ FEATURES ═══ */}
-      <section className="border-t" style={{ borderColor: 'var(--border)' }}>
-        <div className="container-app py-16">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight" style={{ color: 'var(--text-1)' }}>Built for Real Emergencies</h2>
-            <p className="mt-2 text-sm max-w-md mx-auto" style={{ color: 'var(--text-3)' }}>Not a prototype. A production-grade disaster response coordination platform.</p>
+      {/* FEATURES */}
+      <section style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="container-app py-20">
+          <div className="text-center mb-12">
+            <h2 className="text-[28px] sm:text-[36px] font-black tracking-tight" style={{ color: 'var(--text-1)' }}>Built for Real Emergencies</h2>
+            <p className="mt-3 text-[15px] max-w-md mx-auto" style={{ color: 'var(--text-3)' }}>Production-grade coordination, not a hackathon toy.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {features.map((f, i) => (
-              <div key={f.title} className="dark-card p-6 text-center group anim-up" style={{ animationDelay: `${i * 80}ms` }}>
-                <div className="icon-box bg-red-500/10 !w-14 !h-14 !rounded-2xl mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <f.icon className="w-6 h-6 text-red-500" />
+              <div key={f.title} className="dark-card p-6 anim-up" style={{ animationDelay: `${i * 60}ms` }}>
+                <div className="icon-box !w-11 !h-11 !rounded-lg mb-4" style={{ background: 'var(--accent-soft)' }}>
+                  <f.icon className="w-5 h-5" style={{ color: 'var(--accent)' }} />
                 </div>
-                <h3 className="text-sm font-bold mb-2" style={{ color: 'var(--text-1)' }}>{f.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-3)' }}>{f.desc}</p>
+                <h3 className="text-[14px] font-bold mb-1.5" style={{ color: 'var(--text-1)' }}>{f.title}</h3>
+                <p className="text-[13px] leading-relaxed" style={{ color: 'var(--text-3)' }}>{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ═══ FOOTER ═══ */}
-      <footer className="border-t py-8" style={{ borderColor: 'var(--border)' }}>
-        <div className="container-app flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* FOOTER */}
+      <footer style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="container-app py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-red-600 flex items-center justify-center">
+            <div className="w-6 h-6 rounded flex items-center justify-center" style={{ background: 'var(--accent)' }}>
               <ShieldAlert className="w-3 h-3 text-white" />
             </div>
-            <span className="text-xs font-bold" style={{ color: 'var(--text-3)' }}>ReliefChain © 2026</span>
+            <span className="text-[12px] font-semibold" style={{ color: 'var(--text-3)' }}>ReliefChain © 2026</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px] font-medium" style={{ color: 'var(--text-4)' }}>
-            <span>Made for Kerala Flood Relief</span>
-            <span>·</span>
-            <span>Built with ❤️ by Code Breakers</span>
-          </div>
+          <span className="text-[11px]" style={{ color: 'var(--text-4)' }}>Built with care by Code Breakers · Kerala Flood Relief</span>
         </div>
       </footer>
     </div>
