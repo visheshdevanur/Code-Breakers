@@ -49,7 +49,7 @@ function DashboardLayout({ user, profile, children }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-base)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg)' }}>
       <Header currentPage={path} userRole={role} onLogout={handleLogout} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       <div className="flex flex-1">
         <Sidebar role={role} currentPage={path} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onNavigate={(p) => {
