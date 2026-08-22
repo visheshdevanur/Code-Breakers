@@ -29,56 +29,60 @@ export default function MoneyDonationForm({ camps = seedCamps, onDonate }) {
 
   if (showSuccess) {
     return (
-      <div className="bg-slate-800 rounded-xl border border-green-500 p-8 text-center animate-slide-in">
-        <div className="text-6xl mb-4">✅</div>
-        <h3 className="text-2xl font-bold text-green-400 mb-2">Donation Successful!</h3>
-        <p className="text-slate-300">₹{(+amount).toLocaleString()} → {unitsEstimate} {resType} {resType === 'food' ? 'kits' : resType === 'water' ? 'liters' : 'packs'}</p>
-        <p className="text-slate-400 text-sm mt-2">AI is allocating to the most critical camp...</p>
+      <div className="dark-card border border-red-500/30 p-8 text-center anim-up">
+        <div className="icon-box mx-auto mb-4 bg-red-500/10 text-red-500">
+          <Heart className="w-6 h-6" />
+        </div>
+        <h3 className="text-2xl font-bold text-white mb-2">Donation Successful!</h3>
+        <p className="text-neutral-400">₹{(+amount).toLocaleString()} → {unitsEstimate} {resType} {resType === 'food' ? 'kits' : resType === 'water' ? 'liters' : 'packs'}</p>
+        <p className="text-neutral-500 text-sm mt-2">AI is allocating to the most critical camp...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-      <div className="p-4 border-b border-slate-700">
-        <h3 className="text-lg font-bold text-white flex items-center gap-2"><Heart className="w-5 h-5 text-red-400" /> Donate Money</h3>
+    <div className="dark-card overflow-hidden">
+      <div className="p-5 border-b border-white/[0.04]">
+        <h3 className="text-lg font-bold text-white flex items-center gap-2">
+          <Heart className="w-5 h-5 text-red-500" /> Donate Money
+        </h3>
       </div>
-      <div className="p-4 space-y-4">
+      <div className="p-5 space-y-5">
         <div>
-          <label className="text-xs text-slate-400 font-medium block mb-2">Amount (₹)</label>
-          <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="Enter amount" className="w-full bg-slate-700 text-white text-xl rounded-lg px-4 py-3 border border-slate-600 font-bold" />
-          <div className="flex gap-2 mt-2">
+          <label className="text-xs text-neutral-400 font-medium block mb-2">Amount (₹)</label>
+          <input type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="Enter amount" className="input text-xl font-bold" />
+          <div className="flex gap-2 mt-3">
             {quickAmounts.map(a => (
-              <button key={a} onClick={() => setAmount(a)} className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${+amount === a ? 'bg-blue-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}>
+              <button key={a} onClick={() => setAmount(a)} className={`px-4 py-2 rounded-[14px] text-sm font-medium transition-all ${+amount === a ? 'bg-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.3)]' : 'btn-dark'}`}>
                 ₹{a.toLocaleString()}
               </button>
             ))}
           </div>
         </div>
         {amount > 0 && (
-          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 text-sm text-blue-300">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-[16px] p-4 text-sm text-red-400 anim-up">
             ≈ {unitsEstimate} {resType} {resType === 'food' ? 'kits' : resType === 'water' ? 'liters' : 'packs'} (@ ₹{CONVERSION_RATES[resType]}/{resType === 'water' ? 'liter' : 'unit'})
           </div>
         )}
         <div>
-          <label className="text-xs text-slate-400 font-medium block mb-2">Preferred Resource</label>
-          <div className="grid grid-cols-2 gap-2">
+          <label className="text-xs text-neutral-400 font-medium block mb-2">Preferred Resource</label>
+          <div className="grid grid-cols-2 gap-3">
             {resOptions.map(o => (
-              <button key={o.value} onClick={() => setResource(o.value)} className={`flex items-center gap-2 p-3 rounded-lg text-sm transition-colors ${resource === o.value ? 'bg-blue-500/20 border-blue-500 text-blue-300' : 'bg-slate-700 border-slate-600 text-slate-300'} border`}>
+              <button key={o.value} onClick={() => setResource(o.value)} className={`flex items-center gap-2 p-3 rounded-[14px] text-sm transition-all border ${resource === o.value ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'btn-dark'}`}>
                 <o.icon className="w-4 h-4" /> {o.label}
               </button>
             ))}
           </div>
         </div>
         <div>
-          <label className="text-xs text-slate-400 font-medium block mb-2">Camp Preference</label>
-          <select value={campPref} onChange={e => setCampPref(e.target.value)} className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 text-sm border border-slate-600">
-            <option value="ai">🤖 Most Critical (AI Decides)</option>
+          <label className="text-xs text-neutral-400 font-medium block mb-2">Camp Preference</label>
+          <select value={campPref} onChange={e => setCampPref(e.target.value)} className="input">
+            <option value="ai">Most Critical (AI Decides)</option>
             {camps.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
         </div>
-        <button onClick={handleSubmit} disabled={!amount || +amount <= 0} className="w-full bg-green-500 hover:bg-green-600 disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-colors text-sm">
-          💳 Simulate Payment (₹{amount ? (+amount).toLocaleString() : '0'})
+        <button onClick={handleSubmit} disabled={!amount || +amount <= 0} className="btn-red w-full py-3 flex items-center justify-center gap-2 mt-2">
+          Simulate Payment (₹{amount ? (+amount).toLocaleString() : '0'})
         </button>
       </div>
     </div>

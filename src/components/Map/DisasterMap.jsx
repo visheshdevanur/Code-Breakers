@@ -15,8 +15,8 @@ export default function DisasterMap({ camps = seedCamps, resources = seedResourc
   };
 
   return (
-    <div className="relative h-full w-full rounded-xl overflow-hidden border border-slate-700">
-      <MapContainer center={[10.1, 76.38]} zoom={10} className="h-full w-full" style={{ minHeight: '500px', background: '#0f172a' }}>
+    <div className="relative h-full w-full rounded-16 overflow-hidden border border-white/[0.04]">
+      <MapContainer center={[10.1, 76.38]} zoom={10} className="h-full w-full" style={{ minHeight: '500px', background: 'var(--bg-base)' }}>
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
@@ -37,17 +37,17 @@ export default function DisasterMap({ camps = seedCamps, resources = seedResourc
               fillOpacity={0.85}
               eventHandlers={{ click: () => onCampClick?.(camp) }}
             >
-              <Popup>
-                <div className="text-sm min-w-[220px]">
+              <Popup className="custom-popup">
+                <div className="text-sm min-w-[220px] p-1">
                   <div className="font-bold text-base mb-1" style={{ color: st.color }}>{camp.name}</div>
-                  <div className="text-slate-300 mb-2">{camp.village} • Pop: {camp.current_population}</div>
-                  <div className="space-y-1 text-xs">
-                    <div>🍚 Food: <strong>{food ? getDaysRemaining(food) : '?'} days</strong></div>
-                    <div>💧 Water: <strong>{water ? getDaysRemaining(water) : '?'} days</strong></div>
-                    <div>💊 Medicine: <strong>{med ? getDaysRemaining(med) : '?'} days</strong></div>
-                    <div>🏠 Shelter: <strong>{camp.current_population}/{camp.total_capacity}</strong></div>
+                  <div className="text-neutral-400 mb-3 text-xs">{camp.village} • Pop: {camp.current_population}</div>
+                  <div className="space-y-1.5 text-sm text-neutral-200">
+                    <div className="flex justify-between"><span>🍚 Food</span> <strong>{food ? getDaysRemaining(food) : '?'} days</strong></div>
+                    <div className="flex justify-between"><span>💧 Water</span> <strong>{water ? getDaysRemaining(water) : '?'} days</strong></div>
+                    <div className="flex justify-between"><span>💊 Medicine</span> <strong>{med ? getDaysRemaining(med) : '?'} days</strong></div>
+                    <div className="flex justify-between"><span>🏠 Shelter</span> <strong>{camp.current_population}/{camp.total_capacity}</strong></div>
                   </div>
-                  <div className="mt-2 px-2 py-1 rounded text-xs font-bold text-center" style={{ background: st.color + '33', color: st.color }}>
+                  <div className="mt-3 px-3 py-2 rounded-12 text-xs font-bold text-center border" style={{ background: st.color + '15', color: st.color, borderColor: st.color + '30' }}>
                     Score: {score} — {st.label}
                   </div>
                 </div>
@@ -57,15 +57,36 @@ export default function DisasterMap({ camps = seedCamps, resources = seedResourc
         })}
       </MapContainer>
       {/* Legend */}
-      <div className="absolute bottom-4 right-4 bg-slate-900/90 backdrop-blur rounded-lg p-3 border border-slate-700 z-[1000]">
-        <div className="text-xs font-bold text-slate-300 mb-2">Status Legend</div>
-        {[['🔴 Critical', '#dc2626'], ['🟠 Warning', '#f59e0b'], ['🟡 Watch', '#eab308'], ['🟢 Stable', '#16a34a']].map(([label, color]) => (
-          <div key={label} className="flex items-center gap-2 text-xs text-slate-400 py-0.5">
-            <div className="w-3 h-3 rounded-full" style={{ background: color }} />
-            {label}
-          </div>
-        ))}
+      <div className="dark-card absolute bottom-6 right-6 z-[1000] p-4 shadow-xl">
+        <div className="text-xs font-bold text-white mb-3 tracking-wide uppercase">Status Legend</div>
+        <div className="space-y-2">
+          {[['🔴 Critical', '#dc2626'], ['🟠 Warning', '#f59e0b'], ['🟡 Watch', '#eab308'], ['🟢 Stable', '#16a34a']].map(([label, color]) => (
+            <div key={label} className="flex items-center gap-3 text-sm text-neutral-400">
+              <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ background: color, boxShadow: `0 0 8px ${color}80` }} />
+              {label.split(' ')[1]}
+            </div>
+          ))}
+        </div>
       </div>
+      
+      <style>{`
+        .leaflet-popup-content-wrapper {
+          background: var(--bg-card) !important;
+          color: var(--text) !important;
+          border: 1px solid var(--border) !important;
+          border-radius: 16px !important;
+          box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5) !important;
+        }
+        .leaflet-popup-tip {
+          background: var(--bg-card) !important;
+          border-top: 1px solid var(--border) !important;
+          border-left: 1px solid var(--border) !important;
+        }
+        .leaflet-container a.leaflet-popup-close-button {
+          color: var(--text-muted) !important;
+          padding: 8px 8px 0 0 !important;
+        }
+      `}</style>
     </div>
   );
 }

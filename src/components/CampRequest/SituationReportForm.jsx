@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Baby, UserCheck, Heart, Stethoscope, Apple, Droplets, Pill, Home, AlertCircle, Send } from 'lucide-react';
+import { Users, Baby, UserCheck, Heart, Stethoscope, Apple, Droplets, Pill, Home, AlertCircle, Send, FileText } from 'lucide-react';
 import { seedCamps } from '../../lib/seedData';
 
 export default function SituationReportForm({ camps = seedCamps, onSubmit }) {
@@ -8,15 +8,15 @@ export default function SituationReportForm({ camps = seedCamps, onSubmit }) {
   const [errors, setErrors] = useState({});
 
   const fields = [
-    { key: 'total_people', label: 'Total People in Camp', icon: Users, required: true },
-    { key: 'children', label: 'Children (under 12)', icon: Baby, required: true },
-    { key: 'elderly', label: 'Elderly (above 60)', icon: UserCheck, required: true },
-    { key: 'pregnant', label: 'Pregnant Women', icon: Heart, required: true },
-    { key: 'injured', label: 'Injured / Sick', icon: Stethoscope, required: true },
-    { key: 'food_kits', label: 'Food Kits Remaining', icon: Apple, required: true },
-    { key: 'water_liters', label: 'Water (Liters) Remaining', icon: Droplets, required: true },
-    { key: 'medicine_packs', label: 'Medicine Packs Remaining', icon: Pill, required: true },
-    { key: 'shelter_beds', label: 'Shelter Beds Available', icon: Home, required: true },
+    { key: 'total_people', label: 'Total People', icon: Users, required: true },
+    { key: 'children', label: 'Children (<12)', icon: Baby, required: true },
+    { key: 'elderly', label: 'Elderly (>60)', icon: UserCheck, required: true },
+    { key: 'pregnant', label: 'Pregnant', icon: Heart, required: true },
+    { key: 'injured', label: 'Injured/Sick', icon: Stethoscope, required: true },
+    { key: 'food_kits', label: 'Food Kits', icon: Apple, required: true },
+    { key: 'water_liters', label: 'Water (L)', icon: Droplets, required: true },
+    { key: 'medicine_packs', label: 'Meds (Packs)', icon: Pill, required: true },
+    { key: 'shelter_beds', label: 'Shelter Beds', icon: Home, required: true },
   ];
 
   const handleSubmit = (e) => {
@@ -44,49 +44,92 @@ export default function SituationReportForm({ camps = seedCamps, onSubmit }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-      <div className="p-4 border-b border-slate-700">
-        <h3 className="text-lg font-bold text-white">📋 Situation Report</h3>
-        <p className="text-xs text-slate-400 mt-1">Enter current camp status. AI will auto-calculate needs.</p>
+    <form onSubmit={handleSubmit} className="dark-card overflow-hidden">
+      <div className="p-5 border-b border-white/[0.04] bg-white/[0.01]">
+        <div className="flex items-center gap-3">
+          <div className="icon-box bg-white/[0.04] text-neutral-300 w-10 h-10">
+            <FileText className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-white">Situation Report</h3>
+            <p className="text-xs text-neutral-400 mt-0.5">Submit current metrics for AI needs calculation</p>
+          </div>
+        </div>
       </div>
-      <div className="p-4 space-y-4">
+      
+      <div className="p-5 space-y-6">
         <div>
-          <label className="text-xs text-slate-400 font-medium block mb-1">Select Camp</label>
-          <select value={selectedCamp} onChange={e => setSelectedCamp(e.target.value)} className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 text-sm border border-slate-600">
-            {camps.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {fields.map(f => (
-            <div key={f.key}>
-              <label className="text-xs text-slate-400 font-medium mb-1 flex items-center gap-1">
-                <f.icon className="w-3 h-3" /> {f.label}
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={form[f.key]}
-                onChange={e => setForm(v => ({ ...v, [f.key]: e.target.value }))}
-                className={`w-full bg-slate-700 text-white rounded-lg px-3 py-2 text-sm border ${errors[f.key] ? 'border-red-500' : 'border-slate-600'}`}
-                placeholder="0"
-              />
-              {errors[f.key] && <span className="text-xs text-red-400">{errors[f.key]}</span>}
+          <label className="text-sm font-medium text-neutral-300 block mb-2">Target Camp</label>
+          <div className="relative">
+            <select 
+              value={selectedCamp} 
+              onChange={e => setSelectedCamp(e.target.value)} 
+              className="input w-full appearance-none pr-10"
+            >
+              {camps.map(c => <option key={c.id} value={c.id} className="bg-[#111318]">{c.name}</option>)}
+            </select>
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-500">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </div>
-          ))}
+          </div>
         </div>
+
         <div>
-          <label className="text-xs text-slate-400 font-medium mb-1 flex items-center gap-1">
-            <AlertCircle className="w-3 h-3" /> Any Urgent Need? (optional)
+          <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-3 border-b border-white/[0.04] pb-2">Population & Demographics</h4>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {fields.slice(0, 5).map((f, i) => (
+              <div key={f.key} className="anim-up" style={{ animationDelay: `${i * 30}ms` }}>
+                <label className="text-xs font-medium text-neutral-400 mb-1.5 flex items-center gap-1.5">
+                  <f.icon className="w-3.5 h-3.5 text-neutral-500" /> {f.label}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={form[f.key]}
+                  onChange={e => setForm(v => ({ ...v, [f.key]: e.target.value }))}
+                  className={`input w-full ${errors[f.key] ? '!border-red-500/50 focus:!border-red-500' : ''}`}
+                  placeholder="0"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-3 border-b border-white/[0.04] pb-2">Current Resources</h4>
+          <div className="grid grid-cols-2 gap-4">
+            {fields.slice(5).map((f, i) => (
+              <div key={f.key} className="anim-up" style={{ animationDelay: `${(i + 5) * 30}ms` }}>
+                <label className="text-xs font-medium text-neutral-400 mb-1.5 flex items-center gap-1.5">
+                  <f.icon className="w-3.5 h-3.5 text-neutral-500" /> {f.label}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={form[f.key]}
+                  onChange={e => setForm(v => ({ ...v, [f.key]: e.target.value }))}
+                  className={`input w-full ${errors[f.key] ? '!border-red-500/50 focus:!border-red-500' : ''}`}
+                  placeholder="0"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="text-sm font-medium text-neutral-300 mb-2 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-500" /> Special Requirements (Optional)
           </label>
           <textarea
             value={form.urgent_need}
             onChange={e => setForm(v => ({ ...v, urgent_need: e.target.value }))}
-            className="w-full bg-slate-700 text-white rounded-lg px-3 py-2 text-sm border border-slate-600 h-20 resize-none"
-            placeholder="e.g., Need insulin for 3 diabetic patients"
+            className="input w-full h-24 resize-none"
+            placeholder="Describe any critical situations, specific medical needs, or infrastructure damage..."
           />
         </div>
-        <button type="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
-          <Send className="w-4 h-4" /> Submit & Analyze with AI
+
+        <button type="submit" className="btn-red w-full flex items-center justify-center gap-2 py-3.5 text-sm font-medium">
+          <Send className="w-4 h-4" /> Run AI Needs Analysis
         </button>
       </div>
     </form>

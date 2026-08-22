@@ -48,132 +48,129 @@ export default function SignUpPage({ onAuth }) {
     }
   };
 
-  const inputCls = "input !pl-11";
-  const inputNoCls = "input";
-
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg-base)' }}>
       <div className="max-w-lg w-full">
-        <div className="text-center mb-6">
-          <Link to="/" className="inline-flex items-center gap-2 mb-3">
-            <ShieldAlert className="w-10 h-10 text-red-500" />
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-flex items-center justify-center icon-box bg-red-500/10 mb-4">
+            <ShieldAlert className="w-6 h-6 text-red-500" />
           </Link>
           <h1 className="text-3xl font-bold text-white">Join ReliefChain</h1>
-          <p className="text-slate-500 mt-1">Choose your role and start helping today</p>
+          <p className="text-neutral-400 mt-2">Choose your role and start helping today</p>
         </div>
 
         {/* Step indicators */}
-        <div className="flex items-center gap-2 justify-center mb-6">
+        <div className="flex items-center gap-3 justify-center mb-8">
           {[1, 2].map(s => (
-            <div key={s} className={`w-3 h-3 rounded-full transition-all ${step >= s ? 'bg-blue-500 scale-110' : 'bg-slate-700'}`} />
+            <div key={s} className={`w-3 h-3 rounded-full transition-all ${step >= s ? 'bg-red-500 scale-110 shadow-[0_0_10px_rgba(220,38,38,0.5)]' : 'bg-white/[0.04]'}`} />
           ))}
-          {role === 'ngo' || role === 'driver' ? <div className={`w-3 h-3 rounded-full transition-all ${step >= 3 ? 'bg-blue-500 scale-110' : 'bg-slate-700'}`} /> : null}
+          {role === 'ngo' || role === 'driver' ? <div className={`w-3 h-3 rounded-full transition-all ${step >= 3 ? 'bg-red-500 scale-110 shadow-[0_0_10px_rgba(220,38,38,0.5)]' : 'bg-white/[0.04]'}`} /> : null}
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-slate-800 rounded-2xl border border-slate-700 p-8 space-y-5">
-          {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-4 py-3 text-sm">{error}</div>}
+        <form onSubmit={handleSubmit} className="dark-card p-6 sm:p-8 space-y-6">
+          {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-12 px-4 py-3 text-sm">{error}</div>}
 
           {/* STEP 1: Choose Role */}
           {step === 1 && (
-            <>
-              <label className="text-sm text-slate-300 font-medium block mb-2">How do you want to help?</label>
-              <div className="space-y-2">
-                {roleOptions.map(r => (
+            <div className="anim-in">
+              <label className="text-sm text-neutral-300 font-medium block mb-3">How do you want to help?</label>
+              <div className="space-y-3">
+                {roleOptions.map((r, i) => (
                   <button key={r.value} type="button" onClick={() => setRole(r.value)}
-                    className={`w-full text-left px-4 py-3.5 rounded-xl border transition-all ${role === r.value ? 'bg-blue-500/15 border-blue-500 text-white ring-1 ring-blue-500/50' : 'bg-slate-700/50 border-slate-600 text-slate-300 hover:border-slate-500'}`}>
-                    <div className="font-semibold">{r.label}</div>
-                    <div className="text-xs text-slate-400 mt-0.5">{r.desc}</div>
+                    className={`w-full text-left px-5 py-4 rounded-16 border transition-all anim-up d${i + 1} ${role === r.value ? 'bg-red-500/10 border-red-500/50 text-white shadow-[0_0_15px_rgba(220,38,38,0.15)]' : 'bg-white/[0.02] border-white/[0.04] text-neutral-400 hover:bg-white/[0.04]'}`}>
+                    <div className={`font-semibold ${role === r.value ? 'text-white' : 'text-neutral-200'}`}>{r.label}</div>
+                    <div className="text-sm mt-1">{r.desc}</div>
                   </button>
                 ))}
               </div>
               <button type="button" disabled={!role} onClick={() => setStep(2)}
-                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-slate-600 text-white font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+                className="btn-red w-full mt-6 py-3.5 flex items-center justify-center gap-2">
                 Continue <ArrowRight className="w-4 h-4" />
               </button>
-            </>
+            </div>
           )}
 
           {/* STEP 2: Basic Details */}
           {step === 2 && (
-            <>
-              <div className="text-center mb-2">
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-400">
+            <div className="anim-in space-y-5">
+              <div className="text-center mb-4">
+                <span className="badge bg-red-500/10 text-red-500 border-red-500/20">
                   Signing up as {roleOptions.find(r => r.value === role)?.label}
                 </span>
               </div>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Full Name *</label>
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Full Name *</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input type="text" value={form.full_name} onChange={set('full_name')} required placeholder="Enter your full name" className={inputCls} />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <input type="text" value={form.full_name} onChange={set('full_name')} required placeholder="Enter your full name" className="input !pl-11" />
                 </div>
               </div>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Email *</label>
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Email *</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input type="email" value={form.email} onChange={set('email')} required placeholder="your@email.com" className={inputCls} />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <input type="email" value={form.email} onChange={set('email')} required placeholder="your@email.com" className="input !pl-11" />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-slate-300 font-medium block mb-1.5">Phone *</label>
+                  <label className="text-sm text-neutral-300 font-medium block mb-2">Phone *</label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input type="tel" value={form.phone} onChange={set('phone')} required placeholder="+91..." className={inputCls} />
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                    <input type="tel" value={form.phone} onChange={set('phone')} required placeholder="+91..." className="input !pl-11" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm text-slate-300 font-medium block mb-1.5">City *</label>
+                  <label className="text-sm text-neutral-300 font-medium block mb-2">City *</label>
                   <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                    <input type="text" value={form.city} onChange={set('city')} required placeholder="Kochi" className={inputCls} />
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                    <input type="text" value={form.city} onChange={set('city')} required placeholder="Kochi" className="input !pl-11" />
                   </div>
                 </div>
               </div>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Password *</label>
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Password *</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input type="password" value={form.password} onChange={set('password')} required placeholder="Min 6 characters" className={inputCls} />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <input type="password" value={form.password} onChange={set('password')} required placeholder="Min 6 characters" className="input !pl-11" />
                 </div>
               </div>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Confirm Password *</label>
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Confirm Password *</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input type="password" value={form.confirm_password} onChange={set('confirm_password')} required placeholder="••••••••" className={inputCls} />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <input type="password" value={form.confirm_password} onChange={set('confirm_password')} required placeholder="••••••••" className="input !pl-11" />
                 </div>
               </div>
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setStep(1)} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-medium transition-colors">Back</button>
+              <div className="flex gap-4 pt-2">
+                <button type="button" onClick={() => setStep(1)} className="btn-dark flex-1">Back</button>
                 {(role === 'ngo' || role === 'driver') ? (
-                  <button type="button" onClick={() => setStep(3)} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2">
-                    Next: {role === 'ngo' ? 'Organization' : 'Vehicle'} Details <ArrowRight className="w-4 h-4" />
+                  <button type="button" onClick={() => setStep(3)} className="btn-red flex-[2] flex items-center justify-center gap-2">
+                    Next Details <ArrowRight className="w-4 h-4" />
                   </button>
                 ) : (
-                  <button type="submit" disabled={loading} className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-slate-600 text-white py-3 rounded-xl font-bold transition-colors">
-                    {loading ? 'Creating...' : '✅ Create Account'}
+                  <button type="submit" disabled={loading} className="btn-red flex-[2]">
+                    {loading ? 'Creating...' : 'Create Account'}
                   </button>
                 )}
               </div>
-            </>
+            </div>
           )}
 
           {/* STEP 3: Role-specific details */}
           {step === 3 && role === 'ngo' && (
-            <>
-              <h3 className="text-lg font-bold text-white">🏥 Organization Details</h3>
+            <div className="anim-in space-y-5">
+              <h3 className="text-xl font-bold text-white mb-6">🏥 Organization Details</h3>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Organization Name *</label>
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Organization Name *</label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input type="text" value={form.organization_name} onChange={set('organization_name')} required placeholder="Red Cross Kerala" className={inputCls} />
+                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <input type="text" value={form.organization_name} onChange={set('organization_name')} required placeholder="Red Cross Kerala" className="input !pl-11" />
                 </div>
               </div>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Organization Type *</label>
-                <select value={form.organization_type} onChange={set('organization_type')} required className={inputNoCls}>
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Organization Type *</label>
+                <select value={form.organization_type} onChange={set('organization_type')} required className="input">
                   <option value="">Select type...</option>
                   <option value="ngo">NGO</option>
                   <option value="government">Government Body</option>
@@ -183,32 +180,32 @@ export default function SignUpPage({ onAuth }) {
                 </select>
               </div>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Registration Number *</label>
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Registration Number *</label>
                 <div className="relative">
-                  <FileText className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input type="text" value={form.registration_number} onChange={set('registration_number')} required placeholder="NGO/REG/12345" className={inputCls} />
+                  <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <input type="text" value={form.registration_number} onChange={set('registration_number')} required placeholder="NGO/REG/12345" className="input !pl-11" />
                 </div>
               </div>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Document / Certificate URL</label>
-                <input type="url" value={form.document_url} onChange={set('document_url')} placeholder="https://..." className={inputNoCls} />
-                <p className="text-xs text-slate-500 mt-1">Upload your registration certificate to a drive and paste the link</p>
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Document / Certificate URL</label>
+                <input type="url" value={form.document_url} onChange={set('document_url')} placeholder="https://..." className="input" />
+                <p className="text-xs text-neutral-500 mt-2">Upload your registration certificate to a drive and paste the link</p>
               </div>
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setStep(2)} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-medium">Back</button>
-                <button type="submit" disabled={loading} className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-slate-600 text-white py-3 rounded-xl font-bold">
-                  {loading ? 'Creating...' : '✅ Create Account'}
+              <div className="flex gap-4 pt-2">
+                <button type="button" onClick={() => setStep(2)} className="btn-dark flex-1">Back</button>
+                <button type="submit" disabled={loading} className="btn-red flex-[2]">
+                  {loading ? 'Creating...' : 'Create Account'}
                 </button>
               </div>
-            </>
+            </div>
           )}
 
           {step === 3 && role === 'driver' && (
-            <>
-              <h3 className="text-lg font-bold text-white">🚛 Vehicle & License Details</h3>
+            <div className="anim-in space-y-5">
+              <h3 className="text-xl font-bold text-white mb-6">🚛 Vehicle & License Details</h3>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Vehicle Type *</label>
-                <select value={form.vehicle_type} onChange={set('vehicle_type')} required className={inputNoCls}>
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Vehicle Type *</label>
+                <select value={form.vehicle_type} onChange={set('vehicle_type')} required className="input">
                   <option value="">Select type...</option>
                   <option value="truck">Truck</option>
                   <option value="auto">Auto Rickshaw</option>
@@ -219,41 +216,41 @@ export default function SignUpPage({ onAuth }) {
                 </select>
               </div>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Vehicle Number *</label>
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Vehicle Number *</label>
                 <div className="relative">
-                  <Truck className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input type="text" value={form.vehicle_number} onChange={set('vehicle_number')} required placeholder="KL-07-AB-1234" className={inputCls} />
+                  <Truck className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <input type="text" value={form.vehicle_number} onChange={set('vehicle_number')} required placeholder="KL-07-AB-1234" className="input !pl-11" />
                 </div>
               </div>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Driving License Number *</label>
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Driving License Number *</label>
                 <div className="relative">
-                  <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-                  <input type="text" value={form.driving_license} onChange={set('driving_license')} required placeholder="DL-XXXXXX" className={inputCls} />
+                  <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+                  <input type="text" value={form.driving_license} onChange={set('driving_license')} required placeholder="DL-XXXXXX" className="input !pl-11" />
                 </div>
               </div>
               <div>
-                <label className="text-sm text-slate-300 font-medium block mb-1.5">Carrying Capacity (in kits/items)</label>
-                <input type="number" value={form.carrying_capacity} onChange={set('carrying_capacity')} placeholder="500" className={inputNoCls} />
+                <label className="text-sm text-neutral-300 font-medium block mb-2">Carrying Capacity (in kits/items)</label>
+                <input type="number" value={form.carrying_capacity} onChange={set('carrying_capacity')} placeholder="500" className="input" />
               </div>
-              <label className="flex items-center gap-3 cursor-pointer bg-slate-700/50 p-3 rounded-lg">
-                <input type="checkbox" checked={form.can_access_flooded} onChange={set('can_access_flooded')} className="w-4 h-4 rounded accent-blue-500" />
+              <label className="flex items-center gap-4 cursor-pointer bg-white/[0.02] border border-white/[0.04] p-4 rounded-12 hover:bg-white/[0.04] transition-colors">
+                <input type="checkbox" checked={form.can_access_flooded} onChange={set('can_access_flooded')} className="w-5 h-5 rounded border-white/[0.1] bg-white/[0.05] text-red-500 focus:ring-red-500 focus:ring-offset-0" />
                 <div>
                   <span className="text-sm text-white font-medium">Can access flooded roads?</span>
-                  <p className="text-xs text-slate-400">e.g., boat or raised vehicle</p>
+                  <p className="text-xs text-neutral-400 mt-1">e.g., boat or raised vehicle</p>
                 </div>
               </label>
-              <div className="flex gap-3">
-                <button type="button" onClick={() => setStep(2)} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-3 rounded-xl font-medium">Back</button>
-                <button type="submit" disabled={loading} className="flex-1 bg-green-500 hover:bg-green-600 disabled:bg-slate-600 text-white py-3 rounded-xl font-bold">
-                  {loading ? 'Creating...' : '✅ Create Account'}
+              <div className="flex gap-4 pt-2">
+                <button type="button" onClick={() => setStep(2)} className="btn-dark flex-1">Back</button>
+                <button type="submit" disabled={loading} className="btn-red flex-[2]">
+                  {loading ? 'Creating...' : 'Create Account'}
                 </button>
               </div>
-            </>
+            </div>
           )}
 
-          <p className="text-center text-sm text-slate-400">
-            Already have an account? <Link to="/signin" className="text-blue-400 hover:text-blue-300 font-medium">Sign In</Link>
+          <p className="text-center text-sm text-neutral-400 mt-6 pt-6 border-t border-white/[0.04]">
+            Already have an account? <Link to="/signin" className="text-red-500 hover:text-red-400 font-medium ml-1">Sign In</Link>
           </p>
         </form>
       </div>

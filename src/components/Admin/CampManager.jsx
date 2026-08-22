@@ -26,7 +26,6 @@ export default function CampManager({ camps = [], coordinators = [], onRefresh }
         status: 'active',
       });
       if (error) throw error;
-      // Also create 4 default resources for the camp
       setShowForm(false);
       setForm({ name: '', village: '', district: 'Ernakulam', latitude: '', longitude: '', total_capacity: 500, road_accessibility: 5 });
       onRefresh?.();
@@ -61,54 +60,52 @@ export default function CampManager({ camps = [], coordinators = [], onRefresh }
     }
   };
 
-  const inputCls = "w-full bg-slate-700 text-white rounded-lg px-4 py-2.5 border border-slate-600 focus:border-blue-500 focus:outline-none text-sm";
-
   return (
     <div className="space-y-6">
       {/* Create Camp Section */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-        <div className="p-4 border-b border-slate-700 flex items-center justify-between">
+      <div className="dark-card overflow-hidden">
+        <div className="p-4 border-b border-white/[0.04] flex items-center justify-between">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-blue-400" /> Manage Relief Camps
+            <MapPin className="w-5 h-5 text-red-500" /> Manage Relief Camps
           </h3>
           <button onClick={() => setShowForm(!showForm)}
-            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-1 transition-colors">
+            className="btn-red flex items-center gap-2">
             <Plus className="w-4 h-4" /> Create Camp
           </button>
         </div>
 
         {/* Create Camp Form */}
         {showForm && (
-          <form onSubmit={handleCreateCamp} className="p-4 bg-slate-700/30 border-b border-slate-700 space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+          <form onSubmit={handleCreateCamp} className="p-4 bg-white/[0.02] border-b border-white/[0.04] space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-slate-400 font-medium block mb-1">Camp Name *</label>
-                <input value={form.name} onChange={set('name')} required placeholder="e.g., Aluva Relief Camp" className={inputCls} />
+                <label className="text-xs text-neutral-400 font-medium block mb-1">Camp Name *</label>
+                <input value={form.name} onChange={set('name')} required placeholder="e.g., Aluva Relief Camp" className="input" />
               </div>
               <div>
-                <label className="text-xs text-slate-400 font-medium block mb-1">Village/Town *</label>
-                <input value={form.village} onChange={set('village')} required placeholder="e.g., Aluva" className={inputCls} />
+                <label className="text-xs text-neutral-400 font-medium block mb-1">Village/Town *</label>
+                <input value={form.village} onChange={set('village')} required placeholder="e.g., Aluva" className="input" />
               </div>
               <div>
-                <label className="text-xs text-slate-400 font-medium block mb-1">Latitude *</label>
-                <input type="number" step="any" value={form.latitude} onChange={set('latitude')} required placeholder="10.1077" className={inputCls} />
+                <label className="text-xs text-neutral-400 font-medium block mb-1">Latitude *</label>
+                <input type="number" step="any" value={form.latitude} onChange={set('latitude')} required placeholder="10.1077" className="input" />
               </div>
               <div>
-                <label className="text-xs text-slate-400 font-medium block mb-1">Longitude *</label>
-                <input type="number" step="any" value={form.longitude} onChange={set('longitude')} required placeholder="76.3516" className={inputCls} />
+                <label className="text-xs text-neutral-400 font-medium block mb-1">Longitude *</label>
+                <input type="number" step="any" value={form.longitude} onChange={set('longitude')} required placeholder="76.3516" className="input" />
               </div>
               <div>
-                <label className="text-xs text-slate-400 font-medium block mb-1">Total Capacity</label>
-                <input type="number" value={form.total_capacity} onChange={set('total_capacity')} className={inputCls} />
+                <label className="text-xs text-neutral-400 font-medium block mb-1">Total Capacity</label>
+                <input type="number" value={form.total_capacity} onChange={set('total_capacity')} className="input" />
               </div>
               <div>
-                <label className="text-xs text-slate-400 font-medium block mb-1">Road Accessibility (1-10)</label>
-                <input type="number" min="1" max="10" value={form.road_accessibility} onChange={set('road_accessibility')} className={inputCls} />
+                <label className="text-xs text-neutral-400 font-medium block mb-1">Road Accessibility (1-10)</label>
+                <input type="number" min="1" max="10" value={form.road_accessibility} onChange={set('road_accessibility')} className="input" />
               </div>
             </div>
-            <div className="flex gap-2 justify-end">
-              <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 bg-slate-700 text-slate-300 rounded-lg text-sm">Cancel</button>
-              <button type="submit" disabled={loading} className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-bold flex items-center gap-1">
+            <div className="flex gap-2 justify-end pt-2">
+              <button type="button" onClick={() => setShowForm(false)} className="btn-dark">Cancel</button>
+              <button type="submit" disabled={loading} className="btn-red flex items-center gap-2">
                 <Save className="w-4 h-4" /> {loading ? 'Creating...' : 'Create Camp'}
               </button>
             </div>
@@ -116,56 +113,56 @@ export default function CampManager({ camps = [], coordinators = [], onRefresh }
         )}
 
         {/* Camps List */}
-        <div className="divide-y divide-slate-700">
+        <div className="divide-y divide-white/[0.04]">
           {camps.length === 0 ? (
-            <div className="p-8 text-center text-slate-400">No camps created yet. Click "Create Camp" to add one.</div>
+            <div className="p-8 text-center text-neutral-500">No camps created yet. Click "Create Camp" to add one.</div>
           ) : camps.map(camp => {
             const coordinator = coordinators.find(c => c.id === camp.coordinator_id);
             return (
-              <div key={camp.id} className="p-4 hover:bg-slate-700/30 transition-colors">
+              <div key={camp.id} className="p-5 hover:bg-white/[0.02] transition-colors">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-bold text-white">{camp.name}</div>
-                    <div className="text-xs text-slate-400 mt-0.5">
+                    <div className="text-sm text-neutral-400 mt-1">
                       📍 {camp.village} • Capacity: {camp.total_capacity} • Pop: {camp.current_population || 0}
                     </div>
-                    <div className="text-xs mt-1">
+                    <div className="text-sm mt-2">
                       {coordinator ? (
-                        <span className="text-green-400">👤 Coordinator: {coordinator.full_name}</span>
+                        <span className="text-green-500 flex items-center gap-1"><UserCheck className="w-4 h-4"/> Coordinator: {coordinator.full_name}</span>
                       ) : (
-                        <span className="text-amber-400">⚠️ No coordinator assigned</span>
+                        <span className="text-amber-500">⚠️ No coordinator assigned</span>
                       )}
                     </div>
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => setAssignModal(camp.id)}
-                      className="px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg text-xs font-medium hover:bg-blue-500/30 flex items-center gap-1">
-                      <UserCheck className="w-3 h-3" /> Assign
+                      className="btn-dark flex items-center gap-2">
+                      <UserCheck className="w-4 h-4" /> Assign
                     </button>
                     <button onClick={() => handleDeleteCamp(camp.id)}
-                      className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-xs font-medium hover:bg-red-500/30">
-                      <Trash2 className="w-3 h-3" />
+                      className="btn-dark text-red-500 hover:text-red-400">
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
 
                 {/* Assign Modal */}
                 {assignModal === camp.id && (
-                  <div className="mt-3 bg-slate-700/50 rounded-lg p-3 border border-slate-600">
-                    <div className="text-xs text-slate-300 font-medium mb-2">Select Coordinator:</div>
+                  <div className="mt-4 bg-white/[0.02] rounded-16 p-4 border border-white/[0.04]">
+                    <div className="text-sm text-neutral-300 font-medium mb-3">Select Coordinator:</div>
                     {coordinators.length === 0 ? (
-                      <p className="text-xs text-slate-400">No coordinators registered yet.</p>
+                      <p className="text-sm text-neutral-500">No coordinators registered yet.</p>
                     ) : (
-                      <div className="space-y-1">
+                      <div className="space-y-2">
                         {coordinators.map(c => (
                           <button key={c.id} onClick={() => handleAssign(camp.id, c.id)}
-                            className="w-full text-left px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm text-white transition-colors">
+                            className="w-full text-left px-4 py-3 bg-white/[0.02] hover:bg-white/[0.04] rounded-12 text-sm text-white transition-colors border border-white/[0.04]">
                             {c.full_name} — {c.phone || c.email}
                           </button>
                         ))}
                       </div>
                     )}
-                    <button onClick={() => setAssignModal(null)} className="mt-2 text-xs text-slate-400 hover:text-white">Cancel</button>
+                    <button onClick={() => setAssignModal(null)} className="mt-3 text-sm text-neutral-400 hover:text-white">Cancel</button>
                   </div>
                 )}
               </div>
@@ -175,28 +172,28 @@ export default function CampManager({ camps = [], coordinators = [], onRefresh }
       </div>
 
       {/* Coordinators List */}
-      <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-        <div className="p-4 border-b border-slate-700">
+      <div className="dark-card overflow-hidden">
+        <div className="p-4 border-b border-white/[0.04]">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Users className="w-5 h-5 text-green-400" /> Registered Coordinators
+            <Users className="w-5 h-5 text-blue-500" /> Registered Coordinators
           </h3>
         </div>
-        <div className="divide-y divide-slate-700">
+        <div className="divide-y divide-white/[0.04]">
           {coordinators.length === 0 ? (
-            <div className="p-6 text-center text-slate-400">No coordinators registered yet. They can sign up at the public page.</div>
+            <div className="p-6 text-center text-neutral-500">No coordinators registered yet. They can sign up at the public page.</div>
           ) : coordinators.map(c => {
             const assignedCamp = camps.find(camp => camp.coordinator_id === c.id);
             return (
-              <div key={c.id} className="p-4 flex items-center justify-between">
+              <div key={c.id} className="p-5 flex items-center justify-between">
                 <div>
                   <div className="font-medium text-white">{c.full_name}</div>
-                  <div className="text-xs text-slate-400">{c.email} • {c.phone} • {c.city}</div>
+                  <div className="text-sm text-neutral-400 mt-1">{c.email} • {c.phone} • {c.city}</div>
                 </div>
                 <div>
                   {assignedCamp ? (
-                    <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">Assigned: {assignedCamp.name}</span>
+                    <span className="badge bg-green-500/10 text-green-500 border border-green-500/20">Assigned: {assignedCamp.name}</span>
                   ) : (
-                    <span className="text-xs bg-slate-700 text-slate-400 px-2 py-1 rounded-full">Unassigned</span>
+                    <span className="badge bg-white/[0.04] text-neutral-400 border border-white/[0.04]">Unassigned</span>
                   )}
                 </div>
               </div>
